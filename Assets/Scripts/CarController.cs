@@ -101,20 +101,8 @@ public class CarController : MonoBehaviour
 
     void DriftController()
     {
-        /*
-        if (IsAcc == true)
-        {
-            DriftCalculator = input * Speed * Turning * EnginePower;
-        }
-        else
-        {
-            //DriftCalculator = (input * Speed * Turning * EnginePower) / TEST;
 
-        }
-        */
-        
-
-        if (IsReverse == false && IsGrounded == true)
+        if (IsReverse == false && IsGrounded == true && Speed > 30f / 2f)
             //if (DriftCalculator > MinimumDriftValue || -DriftCalculator > MinimumDriftValue)
             {
             float input = horizontalInput;
@@ -202,9 +190,9 @@ public class CarController : MonoBehaviour
                 }
 
         }
-        //else
+        else
         {
-
+            IsDrifting = false;
             
         }
 
@@ -394,7 +382,7 @@ public class CarController : MonoBehaviour
             IsBraking = false;
             ClutchWait = true;
 
-            if (Speed < MaxSpeed)
+            if (Speed < MaxSpeed && IsGrounded == true)
             {
                 float addspeed = AddSpeed;
 

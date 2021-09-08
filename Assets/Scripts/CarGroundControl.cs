@@ -22,7 +22,10 @@ public class CarGroundControl : MonoBehaviour
         {
             PlayerController.GetComponent<CarController>().GetFrictionValues(FrictionValue);
         }
-
+        else if (other.gameObject.tag == "ai")
+        {
+            PlayerController.GetComponent<CarController>().IsBraking = true;
+        }
 
     }
 

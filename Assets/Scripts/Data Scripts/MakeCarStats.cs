@@ -105,7 +105,8 @@ public class MakeCarStats : MonoBehaviour
     {
         dataManager.data.name = playerName.text;
         dataManager.Save();
-        SceneManager.LoadScene("TestScene");
+        //SceneManager.LoadScene("TestScene");
+        SceneManager.LoadScene("Map1");
 
     }
 

@@ -169,7 +169,7 @@ public class AIGroundControl : MonoBehaviour
     {
         if (other.gameObject.tag == "Player")
         {
-            Debug.Log("Hit Player");
+            //Debug.Log("Hit Player");
         }
 
 
