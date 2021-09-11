@@ -11,6 +11,7 @@ public class CarController : MonoBehaviour
 
     Rigidbody rb;
     Collider col;
+    public PhysicMaterial normalFriction, driftFriction,grassFriction;
     //slide power speed nerf
     public float TEST; //DELETE WHEN NOT IN TEST USE!
     public float Timer; //ONLY FOR THE SHOW
@@ -33,7 +34,7 @@ public class CarController : MonoBehaviour
 
     [SerializeField] //FOR DEBUGGING
     public bool IsBraking = false, IsAcc = false, IsReverse = false, IsDrifting = false, DriftRecorvering = false;
-    public bool IsGrounded, CooldownWait = false, ClutchWait = false;
+    public bool IsGrounded, IsOnGrass = false, CooldownWait = false, ClutchWait = false;
 
     public float horizontalInput, verticalInput; //Turning values from axis (between values of -1 to 1)
     private bool horizontalInputIsNegative;
@@ -62,40 +63,34 @@ public class CarController : MonoBehaviour
 
     public void GetFrictionValues(int FricLvl) //These values are easily changeable
     {
-        var DynMat = col.material.dynamicFriction;
+        //var DynMat = col.material.dynamicFriction;
 
         FrictionLevel = FricLvl;
 
-        if (FricLvl == -1) //Car is upsidedown
-        {
-            DynFriction = 0.6f;
-            StatFriction = 0.6f;
-
-        }
-
-
         if (FricLvl == 0) // DRIFT
         {
-            DynFriction = 0f;
-            StatFriction = 0f;
-
-            col.material.frictionCombine = PhysicMaterialCombine.Multiply;
+            //DynFriction = 0f; normal values
+            //StatFriction = 0f;
+            IsOnGrass = false;
+            col.material = driftFriction;
         }
-        else
+        else if (FricLvl == 1)
         {
-            col.material.frictionCombine = PhysicMaterialCombine.Average;
+            //DynFriction = 0.6f; normal values
+            //StatFriction = 0.6f;
+            IsOnGrass = false;
+            col.material = normalFriction;
         }
-
-        if (FricLvl == 1)
+        else if (FricLvl == 2) //grass
         {
-            DynFriction = 0.6f;
-            StatFriction = 0.6f;
-
+            IsOnGrass = true;
+            col.material = grassFriction;
         }
-
-        col.material.dynamicFriction = DynFriction;
-        col.material.staticFriction = StatFriction;
-
+        else if (FricLvl == -1) //Car is upsidedown
+        {
+            IsOnGrass = false;
+            col.material = normalFriction;
+        }
 
     }
 
@@ -195,13 +190,13 @@ public class CarController : MonoBehaviour
             IsDrifting = false;
             
         }
-
-        if (IsDrifting == false)
+        
+        if (IsDrifting == false && IsOnGrass == false)
         {
             GetFrictionValues(1); //Normal
 
         }
-
+        
 
 
     }
@@ -396,7 +391,7 @@ public class CarController : MonoBehaviour
 
                 Turning = HoldTurningValue;
 
-                if (IsDrifting == true || DriftRecorvering == true)
+                if ((IsDrifting == true || DriftRecorvering == true) && IsOnGrass == false)
                 {
                     addspeed = addspeed * (0.8f + (EnginePower / 20f));
 
@@ -404,7 +399,7 @@ public class CarController : MonoBehaviour
 
 
 
-                if (Spd < Speed && Speed < MaxSpeed/* && IsSpinning == false*/)
+                if (Spd < Speed && Speed < MaxSpeed)
                 {
                     do
                     {
@@ -417,9 +412,13 @@ public class CarController : MonoBehaviour
                     while (Spd < Speed);
                 }
 
-
-
                 AccLerpTime = Speed * EnginePowerNerfer;
+
+                if (IsOnGrass == true && Speed > 5f)
+                {
+                    //AccLerpTime *= 0.75f;
+                    AccBuffer *= 0.8f;
+                }
 
                 CurrentAcceleration = Mathf.Lerp(0.1f, AccBuffer, AccLerpTime * Time.deltaTime);
 

@@ -10,6 +10,8 @@ TagManager:
   - slowtarget
   - normaltarget
   - fasttarget
+  - wall
+  - grass
   layers:
   - Default
   - TransparentFX
