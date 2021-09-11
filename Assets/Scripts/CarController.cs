@@ -374,7 +374,7 @@ public class CarController : MonoBehaviour
         if (Input.GetKey("w") || Input.GetKey("up")) //GAS GAS GAS/////////////////////////////
         {
             IsAcc = true;
-            LoseSpeed = AddSpeed;
+            //LoseSpeed = AddSpeed;
             IsReverse = false;
             IsBraking = false;
             ClutchWait = true;
@@ -385,7 +385,7 @@ public class CarController : MonoBehaviour
 
 
                 addspeed = 750f + (Speed * EnginePower); // 5f -> Speed = 360f // 1.5f = 100f
-
+                
 
                 float EnginePowerNerfer = 0.6f;
                 float Spd = 10f;
@@ -399,7 +399,7 @@ public class CarController : MonoBehaviour
 
                 }
 
-
+                LoseSpeed = addspeed;
 
                 if (Spd < Speed && Speed < MaxSpeed)
                 {
@@ -485,12 +485,12 @@ public class CarController : MonoBehaviour
         {
             if (IsBraking == false)
             {
-                LoseSpeed -= 0.8f; // How much car loses speed when not accelerating (per fixed frame)
+                LoseSpeed -= 1.8f; // How much car loses speed when not accelerating (per fixed frame)
                 rb.AddRelativeForce(new Vector3(0, 0, CurrentAcceleration * LoseSpeed * Time.deltaTime));
             }
             else
             {
-                LoseSpeed -= Brake*(Brake/10); //
+                LoseSpeed -= Brake*(Brake/5); //
                 rb.AddRelativeForce(new Vector3(0, 0, CurrentAcceleration * LoseSpeed * Time.deltaTime));
                 
             }

@@ -26,8 +26,9 @@ public class GetPlayerStats : MonoBehaviour
 
         PlayerController.GetComponent<CarController>().EnginePower = enginePower;
         PlayerController.GetComponent<CarController>().Acceleration = acc;
+        int aiengineclass = dataManager.data.AIEngineClass;
+        AIController.GetComponent<AIController>().AIEngineClass = aiengineclass;//AI 
 
-        AIController.GetComponent<AIController>().AIEngineClass = dataManager.data.AIEngineClass;//AI 
     }
 
 
@@ -35,39 +36,39 @@ public class GetPlayerStats : MonoBehaviour
     {
         
         engineClass = dataManager.data.EngineClass;
-
+        /*
         if (engineClass == 0)
         {
             enginePower = 1.6f;
             dataManager.data.EngineClass = 1;
         }
-
-        else if (engineClass == 1)
+        */
+        if (engineClass == 0)
         {
             enginePower = 1.6f;
         }
 
-        else if (engineClass == 2)
+        else if (engineClass == 1)
         {
             enginePower = 2.08f;
         }
 
-        else if (engineClass == 3)
+        else if (engineClass == 2)
         {
             enginePower = 2.48f;
         }
 
-        else if (engineClass == 4)
+        else if (engineClass == 3)
         {
             enginePower = 2.9f;
         }
 
-        else if (engineClass == 5)
+        else if (engineClass == 4)
         {
             enginePower = 3.27f;
         }
 
-        else if (engineClass == 6)
+        else if (engineClass == 5)
         {
             enginePower = 4.2f;
         }
@@ -87,12 +88,12 @@ public class GetPlayerStats : MonoBehaviour
             acc = 0.845f; //0.84f
         }
 
-        if (accLevel == 2)
+        else if (accLevel == 2)
         {
             acc = 0.855f; //0.85f
         }
 
-        if (accLevel == 3)
+        else if (accLevel == 3)
         {
             acc = 0.87f; //0.86f
         }
