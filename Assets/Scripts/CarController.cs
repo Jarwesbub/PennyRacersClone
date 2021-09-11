@@ -35,7 +35,7 @@ public class CarController : MonoBehaviour
     //[SerializeField] //FOR DEBUGGING
     private bool IsAcc = false, IsReverse = false, IsDrifting = false;
     public bool IsBraking = false, IsGrounded, IsOnGrass = false;
-    private bool CooldownWait = false, ClutchWait = false;
+    private bool CooldownWait = false, ClutchWait = false, WallHit = false;
 
     public float horizontalInput, verticalInput; //Turning values from axis (between values of -1 to 1)
     private bool horizontalInputIsNegative;
@@ -85,6 +85,11 @@ public class CarController : MonoBehaviour
         {
             IsOnGrass = true;
             col.material = grassFriction;
+        }
+        else if (FricLvl == 3) //Wall hit
+        {
+            IsOnGrass = false;
+            WallHit = true;
         }
         else if (FricLvl == -1) //Car is upsidedown
         {
@@ -379,7 +384,7 @@ public class CarController : MonoBehaviour
             IsBraking = false;
             ClutchWait = true;
 
-            if (Speed < MaxSpeed && IsGrounded == true)
+            if (Speed < MaxSpeed && IsGrounded == true && WallHit == false)
             {
                 float addspeed = AddSpeed;
 
@@ -426,14 +431,14 @@ public class CarController : MonoBehaviour
 
                 //CurrentAcc = AccBuffer;
 
-                rb.AddRelativeForce(new Vector3(0, 0, CurrentAcceleration * addspeed * Time.deltaTime));
+                rb.AddRelativeForce(new Vector3(0, 0, 2f*CurrentAcceleration * addspeed * Time.deltaTime)); //2f and rb 0.2mass
             }
 
         }
         else
         {
             IsAcc = false;
-
+            WallHit = false;
         }
 
     }
@@ -470,7 +475,7 @@ public class CarController : MonoBehaviour
                 else
                 {
                     ReverseSpeed = -(150f + (EnginePower * 10f));
-                    rb.AddRelativeForce(new Vector3(0, 0, ReverseSpeed * Time.deltaTime));
+                    rb.AddRelativeForce(new Vector3(0, 0, 2f*ReverseSpeed * Time.deltaTime));//2f and rb 0.2mass
                 }
             }
 
@@ -486,13 +491,13 @@ public class CarController : MonoBehaviour
             if (IsBraking == false)
             {
                 LoseSpeed -= 1.8f; // How much car loses speed when not accelerating (per fixed frame)
-                rb.AddRelativeForce(new Vector3(0, 0, CurrentAcceleration * LoseSpeed * Time.deltaTime));
+                rb.AddRelativeForce(new Vector3(0, 0, 2f*CurrentAcceleration * LoseSpeed * Time.deltaTime));//2f and rb 0.2mass
             }
             else
             {
                 LoseSpeed -= Brake*(Brake/5); //
-                rb.AddRelativeForce(new Vector3(0, 0, CurrentAcceleration * LoseSpeed * Time.deltaTime));
-                
+                rb.AddRelativeForce(new Vector3(0, 0, 2f*CurrentAcceleration * LoseSpeed * Time.deltaTime));//2f and rb 0.2mass
+
             }
 
         }

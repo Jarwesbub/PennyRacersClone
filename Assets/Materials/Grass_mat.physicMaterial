@@ -9,6 +9,6 @@ PhysicMaterial:
   m_Name: Grass_mat
   dynamicFriction: 0.6
   staticFriction: 0.6
-  bounciness: 0
+  bounciness: 1
   frictionCombine: 2
   bounceCombine: 0

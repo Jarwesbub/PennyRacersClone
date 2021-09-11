@@ -36,6 +36,7 @@ public class CarGroundControl : MonoBehaviour
         {
             CarIsGrounded = true;
             MainCamera.GetComponent<CameraController>().ChangeCameraSettings(1); //Car is grounded -> script
+            PlayerController.GetComponent<CarController>().GetFrictionValues(3);
         }
         else if (other.tag == "grass")
         {

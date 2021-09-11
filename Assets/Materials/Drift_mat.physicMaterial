@@ -9,6 +9,6 @@ PhysicMaterial:
   m_Name: Drift_mat
   dynamicFriction: 0
   staticFriction: 0
-  bounciness: 0
+  bounciness: 1
   frictionCombine: 2
   bounceCombine: 2
