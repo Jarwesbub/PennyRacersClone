@@ -24,17 +24,18 @@ public class CarController : MonoBehaviour
     public float Turning = 0.8f, BrakeTurn = 1.8f;
     public float DynFriction, StatFriction; //These are Car's current stats for rb physics material //Dynamic- and Static Friction
 
-    [SerializeField] //Only for showing debug
+    //[SerializeField] //FOR DEBUGGING
     private float CurrentAcceleration, DriftCalculator, DriftVal, DriftAccBuff, PosZ; //CurAcc/DriftCalc = show FixedUpdate values; PosZ = where Car is facing before spawning
 
     private float AddSpeed, ReverseSpeed, ReverseMaxSpeed, DriftValToAxis, CurrRotation; //AddSpeed must be 750f!
     Vector3 oldPosition; //Spawning
-    private float LoseSpeed, AccLerpTime, HoldTurningValue, GripControl, FrictionLevel;
+    private float LoseSpeed, AccLerpTime, HoldTurningValue, FrictionLevel;
     private float CarRbDrag, CarRbDragOnAir = 0f; //Fixes gravity inaccuracy when car is on ground/air (Changes rigidbody's "Drag" value)
 
-    [SerializeField] //FOR DEBUGGING
-    public bool IsBraking = false, IsAcc = false, IsReverse = false, IsDrifting = false, DriftRecorvering = false;
-    public bool IsGrounded, IsOnGrass = false, CooldownWait = false, ClutchWait = false;
+    //[SerializeField] //FOR DEBUGGING
+    private bool IsAcc = false, IsReverse = false, IsDrifting = false;
+    public bool IsBraking = false, IsGrounded, IsOnGrass = false;
+    private bool CooldownWait = false, ClutchWait = false;
 
     public float horizontalInput, verticalInput; //Turning values from axis (between values of -1 to 1)
     private bool horizontalInputIsNegative;
@@ -64,7 +65,6 @@ public class CarController : MonoBehaviour
     public void GetFrictionValues(int FricLvl) //These values are easily changeable
     {
         //var DynMat = col.material.dynamicFriction;
-
         FrictionLevel = FricLvl;
 
         if (FricLvl == 0) // DRIFT
@@ -157,8 +157,10 @@ public class CarController : MonoBehaviour
                 {
                     DriftVal = -maxDriftVal;
                 }
-
-                GripControl = Grip;
+            
+                float GripControl = Grip;
+            if (IsOnGrass == true)
+                GripControl = Grip * 0.25f; //How much grip on grass
                 
 
                 if (GripControl < DriftVal || -GripControl > DriftVal/* && IsDrifting == true*/)
@@ -391,7 +393,7 @@ public class CarController : MonoBehaviour
 
                 Turning = HoldTurningValue;
 
-                if ((IsDrifting == true || DriftRecorvering == true) && IsOnGrass == false)
+                if (IsDrifting == true && IsOnGrass == false)
                 {
                     addspeed = addspeed * (0.8f + (EnginePower / 20f));
 
@@ -507,7 +509,7 @@ public class CarController : MonoBehaviour
 
     void Update() // UI STUFF
     {
-        float SpeedDecimal = Mathf.Round(Speed * 1f) * 2; //ADDED double speed -> looks better ingame
+        float SpeedDecimal = Mathf.Round(Speed * 1f);
 
         SpeedTxt.text = "Speed: " + SpeedDecimal.ToString();
 
