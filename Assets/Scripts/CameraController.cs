@@ -7,24 +7,46 @@ public class CameraController : MonoBehaviour
     public GameObject Player; //Controlled character
     public GameObject CameraPosition; //Where camera "sits"
     public GameObject CameraLookAtPosition; //Where camera looks
+    public GameObject BackCamera;
     public float GroundTime;
     public float AirTime;
     private int CamSet;
 
-    Vector3 CameraOffset;
+    Vector3 CameraOffset, FixedCameraPosition;
+
+    private int LookCommander = 0;
 
     private void Awake()
     {
         CameraOffset = CameraPosition.transform.position;
         gameObject.transform.position = CameraOffset;
         CamSet = 1;
+
+
     }
 
     private void FixedUpdate()
     {
-        Follow(CamSet);
+        if (Input.GetKey(KeyCode.LeftShift))
+        {
+            FixedCameraPosition = BackCamera.transform.position;
+            LookCommander = 2;
+            Follow(CamSet);
+        }
+        else if (LookCommander == 2)
+        {
+            FixedCameraPosition = CameraPosition.transform.position;
+            LookCommander = 1;
+            Follow(CamSet);
+        }
+        else if (LookCommander == 0)//reset
+        {
+            FixedCameraPosition = CameraPosition.transform.position;
+            Follow(CamSet);
 
+        }
     }
+
 
     public void ChangeCameraSettings(int value)
     {
@@ -55,12 +77,24 @@ public class CameraController : MonoBehaviour
         else if (value == 2)
         {
             lerptime = AirTime;
-            Debug.Log("Slow Camera");
+
         }
 
+        if (LookCommander == 2)//WHEN CAMERA LOOKS BACK
+        {
+            gameObject.transform.position = FixedCameraPosition;
+        }
+        else if (LookCommander == 1)//WHEN CAMERA RESETS
+        {
+            gameObject.transform.position = FixedCameraPosition; ;
+            LookCommander = 0;
+        }
+        else if (LookCommander == 0) //NORMAL
+        {
+            gameObject.transform.position = Vector3.Lerp(transform.position, FixedCameraPosition, lerptime * Time.deltaTime);
+        }
 
-        gameObject.transform.position = Vector3.Lerp(transform.position, CameraPosition.transform.position, lerptime * Time.deltaTime);
-        gameObject.transform.LookAt(camlookpos);
+            gameObject.transform.LookAt(camlookpos);
 
     }
 

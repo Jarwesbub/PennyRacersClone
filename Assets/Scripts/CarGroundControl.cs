@@ -8,9 +8,7 @@ public class CarGroundControl : MonoBehaviour
     public GameObject PlayerController;
     public GameObject MainCamera;
     public bool CarIsGrounded;
-    //private int FrictionValue = -1;
 
-    // Start is called before the first frame update
     void Start()
     {
         CarIsGrounded = false; //test
@@ -36,7 +34,7 @@ public class CarGroundControl : MonoBehaviour
         {
             CarIsGrounded = true;
             MainCamera.GetComponent<CameraController>().ChangeCameraSettings(1); //Car is grounded -> script
-            PlayerController.GetComponent<CarController>().GetFrictionValues(3);
+            PlayerController.GetComponent<CarController>().GetFrictionValues(1);
         }
         else if (other.tag == "ai")
         {
@@ -53,10 +51,6 @@ public class CarGroundControl : MonoBehaviour
             CarIsGrounded = false;
 
             MainCamera.GetComponent<CameraController>().ChangeCameraSettings(2); //Car is not grounded -> script
-        }
-        else if (other.tag == "grass")
-        {
-            PlayerController.GetComponent<CarController>().GetFrictionValues(1);//grass
         }
 
     }
