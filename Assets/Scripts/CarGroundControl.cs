@@ -38,9 +38,9 @@ public class CarGroundControl : MonoBehaviour
             MainCamera.GetComponent<CameraController>().ChangeCameraSettings(1); //Car is grounded -> script
             PlayerController.GetComponent<CarController>().GetFrictionValues(3);
         }
-        else if (other.tag == "grass")
+        else if (other.tag == "ai")
         {
-            PlayerController.GetComponent<CarController>().GetFrictionValues(2);//grass
+            PlayerController.GetComponent<CarController>().GetFrictionValues(2);//Enemy
         }
 
     }
