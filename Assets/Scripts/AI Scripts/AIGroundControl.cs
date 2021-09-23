@@ -84,88 +84,91 @@ public class AIGroundControl : MonoBehaviour
         AISpeed = Vector3.Distance(oldPosition, gameObject.transform.position) * 200f; // Original = * 100f
         oldPosition = gameObject.transform.position;
 
-        if (IsGrounded && GameStart)
+        if (GameStart)
         {
-            float spd = 0f;
-            float maxspeed = MaxSpeed;
-            float aispeed = AISpeed;
-            float turnspeed = TurnSpeed;
-
-            float singleStep = AISpeed * Time.deltaTime;
-            Vector3 targetpos = targetPosList[nextTarget] + randomizeTargetPos;
-            Vector3 newDirection = Vector3.RotateTowards(transform.position, targetpos, singleStep, 0.0f);
-
-            Vector3 targetDirection = targetpos - transform.position;
-            Vector3 relativePos = targetpos - transform.position;
-
-            Quaternion rotation = Quaternion.LookRotation(relativePos, Vector3.up);
-
-            Vector3 turningCloseTarget = targetpos + new Vector3(10f, 10f, 10f);
-
-            if (Vector3.Distance(transform.position, targetpos) < 10.0f) //ai wont drive around the target
+            //if (IsGrounded)
             {
-                turnspeed += 5f;
+                float spd = 0f;
+                float maxspeed = MaxSpeed;
+                float aispeed = AISpeed;
+                float turnspeed = TurnSpeed;
 
-            }
+                float singleStep = AISpeed * Time.deltaTime;
+                Vector3 targetpos = targetPosList[nextTarget] + randomizeTargetPos;
+                Vector3 newDirection = Vector3.RotateTowards(transform.position, targetpos, singleStep, 0.0f);
 
-            transform.rotation = Quaternion.Lerp(transform.rotation, rotation, Time.deltaTime * turnspeed);
+                Vector3 targetDirection = targetpos - transform.position;
+                Vector3 relativePos = targetpos - transform.position;
 
-            if (aispeed < (MaxSpeed/* / 2f*/)) //AI's speed 10f = 80km/h
-            {
-                float acc = 0.001f; //This MUST BE 0.005f
-                //acc = MaxSpeed * 0.00003f;
-                float speedvalue = aispeed * AccLerp - AccNerfer; //1f
+                Quaternion rotation = Quaternion.LookRotation(relativePos, Vector3.up);
 
-                float lerpTime = speedvalue * acc;
+                Vector3 turningCloseTarget = targetpos + new Vector3(10f, 10f, 10f);
 
-                if (lerpTime < 0.2f)
-                    lerpTime = 0.2f;
-
-
-                spd = MaxSpeed * 10f * 2f;
-
-
-                float CurrentAcceleration = Mathf.Lerp(0.1f, spd, lerpTime * Time.deltaTime);
-
-                rb.AddRelativeForce(new Vector3(0, -2f, Mass * CurrentAcceleration));
-
-
-            }
-
-
-            if (Vector3.Distance(transform.position, targetpos) < 5.0f) //5f normal
-            {
-                // Swap the position of the cylinder.
-
-                if (nextTarget < allTargets)
+                if (Vector3.Distance(transform.position, targetpos) < 10.0f) //ai wont drive around the target
                 {
-                    nextTarget += 1;
+                    turnspeed += 5f;
 
                 }
-                else
-                    nextTarget = 0;
 
-                targetPosRandomizer(AINumber);
+                transform.rotation = Quaternion.Lerp(transform.rotation, rotation, Time.deltaTime * turnspeed);
+
+                if (aispeed < (MaxSpeed/* / 2f*/)) //AI's speed 10f = 80km/h
+                {
+                    float acc = 0.001f; //This MUST BE 0.005f
+                                        //acc = MaxSpeed * 0.00003f;
+                    float speedvalue = aispeed * AccLerp - AccNerfer; //1f
+
+                    float lerpTime = speedvalue * acc;
+
+                    if (lerpTime < 0.2f)
+                        lerpTime = 0.2f;
+
+
+                    spd = MaxSpeed * 10f * 2f;
+
+
+                    float CurrentAcceleration = Mathf.Lerp(0.1f, spd, lerpTime * Time.deltaTime);
+
+                    rb.AddRelativeForce(new Vector3(0, -2f, Mass * CurrentAcceleration));
+
+
+                }
+
+
+                if (Vector3.Distance(transform.position, targetpos) < 5.0f) //5f normal
+                {
+                    // Swap the position of the cylinder.
+
+                    if (nextTarget < allTargets)
+                    {
+                        nextTarget += 1;
+
+                    }
+                    else
+                        nextTarget = 0;
+
+                    targetPosRandomizer(AINumber);
+
+                }
 
             }
-           
-        }
-        else if(!IsGrounded && GameStart)
-        {
-            if(WaitSteps < Steps)
+            if (!IsGrounded)
             {
-                WaitSteps = 0f;
-                float posZ = transform.rotation.z;
-                transform.rotation = Quaternion.Euler(0, posZ + 0f, 0);
-                
-                Vector3 relativePos = targetPosList[nextTarget] + transform.position;
-                Quaternion rotation = Quaternion.LookRotation(relativePos, Vector3.up);
-                Debug.Log("ReSpawn");
+                if (WaitSteps < Steps)
+                {
+                    WaitSteps = 0f;
+                    float posZ = transform.rotation.z;
+                    transform.rotation = Quaternion.Euler(0, posZ + 0f, 0);
+
+                    Vector3 relativePos = targetPosList[nextTarget] + transform.position;
+                    Quaternion rotation = Quaternion.LookRotation(relativePos, Vector3.up);
+                    Debug.Log("ReSpawn");
+
+                }
+
+                //StartCoroutine(AIRespawnTime());
 
             }
-            
-            //StartCoroutine(AIRespawnTime());
-
         }
         else if (!GameStart)
         {
