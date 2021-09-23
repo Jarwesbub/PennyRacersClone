@@ -8,7 +8,6 @@ public class AIController : MonoBehaviour
     public GameObject[] Target;
     public List<Vector3> targetPosList = new List<Vector3>();
     //public int TargetNumb;
-    //public float TEST;
     [SerializeField]
     private float AISpeed, MaxSpeed, Acc, AccLerp, CurrentAcc, TurnSpeed;
     
@@ -49,43 +48,88 @@ public class AIController : MonoBehaviour
 
         switch (engineclass) //if (engineclass == case 0)
         {
-            case 0:
-                MaxSpeed = 100f;
-                AccLerp = 1f;
-                TurnSpeed = 1.5f;
-                break;
-
-            case 1:
-                MaxSpeed = 120f;
-                AccLerp = 3.2f;
-                TurnSpeed = 1.5f;
+            case 1: /// ACTUAL START->
+                MaxSpeed = 90f;
+                AccLerp = 25f;
+                TurnSpeed = 5f;
                 break;
 
             case 2:
-                MaxSpeed = 160f;
-                AccLerp = 2.2f;
-                TurnSpeed = 1.5f;
+                MaxSpeed = 110f;
+                AccLerp = 18f;
+                TurnSpeed = 5f;
                 break;
 
             case 3:
-                MaxSpeed = 200f;
-                AccLerp = 1.8f;
-                TurnSpeed = 3f;
+                MaxSpeed = 120f;
+                AccLerp = 14f;
+                TurnSpeed = 5f;
                 break;
 
             case 4:
-                MaxSpeed = 240f;
-                AccLerp = 1.40f;
-                TurnSpeed = 4f;
+                MaxSpeed = 140f;//280f
+                AccLerp = 10f;
+                TurnSpeed = 6f;
                 break;
 
             case 5:
-                MaxSpeed = 280f;
-                AccLerp = 1.15f;
-                TurnSpeed = 5f;
+                MaxSpeed = 160f;//280f
+                AccLerp = 8f;
+                TurnSpeed = 8f;
+                break;
+            case 6:
+                MaxSpeed = 160f;//SAME AS 5
+                AccLerp = 8f;
+                TurnSpeed = 8f;
                 break;
         }
 
     }
 
+    /*
+    public void OLDGetAccLevels(int engineclass) // ALL AI STATS ARE HERE!
+    {
+        AIEngineClass = engineclass;
+
+        switch (engineclass) //if (engineclass == case 0)
+        {
+            case 0:
+                MaxSpeed = 50f;
+                AccLerp = 60f; //Higher value = more
+                TurnSpeed = 4f;
+                break;
+
+            case 1:
+                MaxSpeed = 60f;
+                AccLerp = 100f;
+                TurnSpeed = 4f;
+                break;
+
+            case 2: /// ACTUAL START->
+                MaxSpeed = 90f;
+                AccLerp = 25f;
+                TurnSpeed = 5f;
+                break;
+
+            case 3:
+                MaxSpeed = 110f;
+                AccLerp = 18f;
+                TurnSpeed = 5f;
+                break;
+
+            case 4:
+                MaxSpeed = 120f;
+                AccLerp = 14f;
+                TurnSpeed = 5f;
+                break;
+
+            case 5:
+                MaxSpeed = 140f;//280f
+                AccLerp = 10f;
+                TurnSpeed = 6f;
+                break;
+        }
+
+    }
+    */
 }

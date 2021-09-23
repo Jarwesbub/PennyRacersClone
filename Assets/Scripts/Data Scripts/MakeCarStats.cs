@@ -56,11 +56,11 @@ public class MakeCarStats : MonoBehaviour
     public void ClickForEngineClass()
     {
         int engineClass = dataManager.data.EngineClass;
-
-        if (engineClass < 5)
+        int maxValue = 6;
+        if (engineClass < maxValue)
             engineClass += 1;
         else
-            engineClass = 0;
+            engineClass = 1;
 
         dataManager.data.EngineClass = engineClass;
         t_engineclass.text = ("Engine Power = ") + dataManager.data.EngineClass.ToString();

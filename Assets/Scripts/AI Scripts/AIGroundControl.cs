@@ -4,11 +4,12 @@ using UnityEngine;
 
 public class AIGroundControl : MonoBehaviour
 {
+    public GameObject GameController;
     public float DrunkLevel,AccNerfer;
     private int AINumber, AICount, EngineClass, speedLimiter;
     private int nextTarget, allTargets;
     [SerializeField] //DEBUGGING
-    private float AccLerp, TurnSpeed, AISpeed, MaxSpeedHolder, MaxSpeed;
+    private float Steps, WaitSteps, Mass, AccLerp, TurnSpeed, AISpeed, MaxSpeedHolder, MaxSpeed;
     private GameObject Ground;
 
     Rigidbody rb;
@@ -19,22 +20,27 @@ public class AIGroundControl : MonoBehaviour
     private GameObject Target;
     //private List SpawnPoints = array.ToList(Target);
     private static List<Vector3> targetPosList;
-
+    [SerializeField]//DEBUGGING
     private bool IsGrounded;
     public bool GameStart = false;
 
     // Start is called before the first frame update
     void Awake()
     {
-        GameStart = true;
+        GameStart = false;
 
         rb = GetComponent<Rigidbody>();
+        Mass = rb.mass;
+        Mass *=4f; //Original mass was 0.2f
 
         nextTarget = 0;
         IsGrounded = false;
 
         if (AIController == null)
             AIController = GameObject.FindWithTag("aicontroller");
+
+        if (GameController == null)
+            GameController = GameObject.FindWithTag("GameController");
 
         Ground = this.gameObject.transform.GetChild(AINumber).gameObject;
         
@@ -52,7 +58,10 @@ public class AIGroundControl : MonoBehaviour
         TurnSpeed = turnspeed;
         //MaxSpeed = maxSpeedBaseStat - ((float)AINumber * 2f); //Makes number 0 the fastest and 1 slower and so on
         MaxSpeed = maxspeed;
+        
+        MaxSpeed -= (float)AINumber;
         MaxSpeedHolder = MaxSpeed;
+        MaxSpeed -= (float)AINumber;
         //TurnSpeed = (float)EngineClass;
 
         //AIEngineClassCheck(EngineClass);
@@ -69,13 +78,13 @@ public class AIGroundControl : MonoBehaviour
     }
 
 
-
     void FixedUpdate()
     {
+        Steps += Time.deltaTime;
         AISpeed = Vector3.Distance(oldPosition, gameObject.transform.position) * 200f; // Original = * 100f
         oldPosition = gameObject.transform.position;
 
-        if (IsGrounded == true && GameStart == true)
+        if (IsGrounded && GameStart)
         {
             float spd = 0f;
             float maxspeed = MaxSpeed;
@@ -93,11 +102,18 @@ public class AIGroundControl : MonoBehaviour
 
             Vector3 turningCloseTarget = targetpos + new Vector3(10f, 10f, 10f);
 
+            if (Vector3.Distance(transform.position, targetpos) < 10.0f) //ai wont drive around the target
+            {
+                turnspeed += 5f;
+
+            }
+
             transform.rotation = Quaternion.Lerp(transform.rotation, rotation, Time.deltaTime * turnspeed);
 
-            if (aispeed < (MaxSpeed / 2f)) //AI's speed 10f = 80km/h
+            if (aispeed < (MaxSpeed/* / 2f*/)) //AI's speed 10f = 80km/h
             {
-                float acc = 0.005f; //This MUST BE 0.005f
+                float acc = 0.001f; //This MUST BE 0.005f
+                //acc = MaxSpeed * 0.00003f;
                 float speedvalue = aispeed * AccLerp - AccNerfer; //1f
 
                 float lerpTime = speedvalue * acc;
@@ -106,12 +122,12 @@ public class AIGroundControl : MonoBehaviour
                     lerpTime = 0.2f;
 
 
-                spd = MaxSpeedHolder * 10f;
+                spd = MaxSpeed * 10f * 2f;
 
 
                 float CurrentAcceleration = Mathf.Lerp(0.1f, spd, lerpTime * Time.deltaTime);
 
-                rb.AddRelativeForce(new Vector3(0, 0, CurrentAcceleration/* * 10f * Time.deltaTime*/));
+                rb.AddRelativeForce(new Vector3(0, -2f, Mass * CurrentAcceleration));
 
 
             }
@@ -132,15 +148,51 @@ public class AIGroundControl : MonoBehaviour
                 targetPosRandomizer(AINumber);
 
             }
-            
-            if (Vector3.Distance(transform.position, targetpos) < 10.0f) //if enemy gets hit close to the target
+           
+        }
+        else if(!IsGrounded && GameStart)
+        {
+            if(WaitSteps < Steps)
             {
-                turnspeed = 10f;
+                WaitSteps = 0f;
+                float posZ = transform.rotation.z;
+                transform.rotation = Quaternion.Euler(0, posZ + 0f, 0);
+                
+                Vector3 relativePos = targetPosList[nextTarget] + transform.position;
+                Quaternion rotation = Quaternion.LookRotation(relativePos, Vector3.up);
+                Debug.Log("ReSpawn");
 
-            }    
+            }
+            
+            //StartCoroutine(AIRespawnTime());
 
         }
+        else if (!GameStart)
+        {
+            GameStart = GameController.GetComponent<RaceControl>().GameStart;
+
+        }
+        
     }
+    private IEnumerator AIRespawnTime()
+    {
+        float waitTime = 2f;
+        yield return new WaitForSeconds(waitTime);
+
+        if(!IsGrounded)
+        {
+            float posZ = transform.rotation.z;
+            transform.rotation = Quaternion.Euler(0, posZ + 0f, 0);
+        }
+        else
+        {
+            
+        }
+
+    }
+
+
+
     private void targetPosRandomizer(int AInumber)
     {
         float pos = DrunkLevel;
@@ -164,12 +216,42 @@ public class AIGroundControl : MonoBehaviour
         {
             //Debug.Log("Hit Player");
         }
-        else if (other.gameObject.layer == 6)// WALLS
+        else if (other.gameObject.tag == "wall")// WALLS
         {
-            MaxSpeed = 50f;
-            Debug.Log("AI HIT WALL!");
+            float maxspeed = MaxSpeed -= 20f;
+            MaxSpeed = maxspeed;
         }
-        else
+        else if(other.gameObject.tag == "ai")
+        {
+            string numb = " ";
+            for (int i = 0; i < AINumber; i++)
+            {
+                numb = i.ToString();
+                string aiNumb = "ai" + numb;
+
+                if (other.gameObject.tag == aiNumb)
+                {
+                    if (i < AINumber)
+                    {
+                        float maxspd = MaxSpeed -= 20f;
+                        MaxSpeed = maxspd;
+                    }
+
+                    break;
+                }
+            }
+
+        }
+
+    }
+
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.tag == "ground")
+        {
+            IsGrounded = true;
+        }
+        else if (other.gameObject.tag == "ai")
         {
             string numb = " ";
             for (int i = 0; i < AINumber; i++)
@@ -190,53 +272,42 @@ public class AIGroundControl : MonoBehaviour
 
         }
 
-    }
-
-    void OnTriggerEnter(Collider other)
-    {
-        
-        if (other.tag == "ground")
-        {
-            IsGrounded = true;
-            
-        }
-
         float speednerfer = MaxSpeedHolder / 1000f;
 
         if (EngineClass <= 2) //AI levels 0-2
         {
             if (other.tag == "slowtarget") //Red Target
             {
-                MaxSpeed = MaxSpeedHolder * (0.95f - speednerfer); //0.6f
-                MaxSpeed -= DrunkLevel * 2f;
+                MaxSpeed = MaxSpeedHolder * (0.95f - speednerfer); //0.95f
+                //MaxSpeed -= DrunkLevel * 2f;
             }
             else if (other.tag == "normaltarget") //Grey Target
             {
                 MaxSpeed = MaxSpeedHolder * (1f/* - speednerfer*/); //0.8f
-                MaxSpeed -= DrunkLevel * 2f;
+                //MaxSpeed -= DrunkLevel * 2f;
             }
             else if (other.tag == "fasttarget") //Green Target
             {
                 MaxSpeed = MaxSpeedHolder;
-                MaxSpeed -= DrunkLevel * 5f;
+                //MaxSpeed -= DrunkLevel * 5f;
             }
         }
         else //AI levels 3-5
         {
             if (other.tag == "slowtarget") //Red Target
             {
-                MaxSpeed = MaxSpeedHolder * (0.9f - speednerfer); //0.6f
-                MaxSpeed -= DrunkLevel * 2f;
+                MaxSpeed = MaxSpeedHolder * (0.9f/* - speednerfer*/); //0.6f
+                //MaxSpeed -= DrunkLevel * 2f;
             }
             else if (other.tag == "normaltarget") //Grey Target
             {
-                MaxSpeed = MaxSpeedHolder * (1.0f - speednerfer); //0.8f
-                MaxSpeed -= DrunkLevel * 2f;
+                MaxSpeed = MaxSpeedHolder * (1.0f/* - speednerfer*/); //0.8f
+                //MaxSpeed -= DrunkLevel * 2f;
             }
             else if (other.tag == "fasttarget") //Green Target
             {
                 MaxSpeed = MaxSpeedHolder;
-                MaxSpeed -= DrunkLevel * 5f;
+                //MaxSpeed -= DrunkLevel * 5f;
             }
         }
     }
@@ -247,7 +318,7 @@ public class AIGroundControl : MonoBehaviour
         if (other.tag == "ground")
         {
             IsGrounded = false;
-
+            WaitSteps = Steps + 4f; //Wait 4 seconds before respawn
         }
 
     }

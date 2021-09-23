@@ -7,6 +7,7 @@ public class CarController : MonoBehaviour
 {
     public GameObject Car;
     public GameObject PlayerData;
+    public GameObject GameController;
     public Text SpeedTxt;
 
     Rigidbody rb;
@@ -37,7 +38,7 @@ public class CarController : MonoBehaviour
     [SerializeField] //FOR DEBUGGING
     private bool IsTurning = false, IsAcc = false, IsReverse = false, IsDrifting = false;
     public bool IsBraking = false, IsGrounded, IsHitting = false, IsOnGrass = false;
-    private bool CooldownWait = false, ClutchWait = false;
+    private bool GameStart = false, CooldownWait = false, ClutchWait = false;
 
     public float horizontalInput, verticalInput; //Turning values from axis (between values of -1 to 1)
     private bool horizontalInputIsNegative;
@@ -45,6 +46,10 @@ public class CarController : MonoBehaviour
 
     void Awake()
     {
+        if (GameController == null)
+            GameObject.FindWithTag("GameController");
+
+
         Speed = 0f;
         SpeedLimiter = 1f;
         AddSpeed = 750f; //MUST BE 750f for this build
@@ -194,78 +199,85 @@ public class CarController : MonoBehaviour
     void FixedUpdate()
     {
         Steps += Time.deltaTime;
-        if (IsHitting == false)
+
+        if (GameStart)
         {
-            horizontalInput = Input.GetAxis("Horizontal");
-            verticalInput = Input.GetAxis("Vertical");
+            if (IsHitting == false)
+            {
+                horizontalInput = Input.GetAxis("Horizontal");
+                verticalInput = Input.GetAxis("Vertical");
+            }
+            else
+            {
+                horizontalInput = 0f;
+            }
+            float newEulerAngles = Car.transform.rotation.eulerAngles.y;
+
+            if (oldEulerAngles < newEulerAngles - 0.2f)//When rotating RIGHT
+            {
+                horizontalInputIsNegative = false;
+            }
+            else if (oldEulerAngles > newEulerAngles + 0.2f)//When rotating LEFT
+            {
+                horizontalInputIsNegative = true;
+            }
+
+            oldEulerAngles = Car.transform.rotation.eulerAngles.y;
+
+            if (IsGrounded == true)
+            {
+                rb.drag = CarRbDrag;
+                CarRbDrag = rb.drag; //DELETE THIS! ONLY FOR TESTING IN GAMEPLAY SCREEN
+            }
+            else
+            {
+                rb.drag = CarRbDragOnAir;
+            }
+
+            if (Car.GetComponent<CarGroundControl>().CarIsGrounded == true)
+            {
+
+                IsGrounded = true;
+
+                DriftController();
+                CarAllTurningInputs(DriftValToAxis);
+
+
+                CarGoForwardInputs();
+
+                CarGoBackwardsBrakingInputs();
+
+            }
+            else
+            {
+                IsGrounded = false;
+
+                if (Speed < 0.5 && CooldownWait == false)
+                {
+                    CooldownWait = true;
+                    StartCoroutine(ReSpawnCooldownWait());
+                }
+            }
+
+
+            if (IsAcc == false && IsGrounded == true)
+            {
+                if (Speed > 1f && LoseSpeed > 0f && IsReverse == false)
+                {
+                    StopAcceleratingForward(true);
+                }
+                else if (Speed > 1f && LoseSpeed < 0f && IsReverse == true)
+                {
+                    StopAcceleratingForward(false);
+
+                }
+
+            }
         }
         else
         {
-            horizontalInput = 0f;
+            GameStart = GameController.GetComponent<RaceControl>().GameStart;
         }
-        float newEulerAngles = Car.transform.rotation.eulerAngles.y;
-
-        if (oldEulerAngles < newEulerAngles - 0.2f)//When rotating RIGHT
-        {
-            horizontalInputIsNegative = false;
-        }
-        else if (oldEulerAngles > newEulerAngles + 0.2f)//When rotating LEFT
-        {
-            horizontalInputIsNegative = true;
-        }
-
-        oldEulerAngles = Car.transform.rotation.eulerAngles.y;
-
-        if (IsGrounded == true)
-        {
-            rb.drag = CarRbDrag;
-            CarRbDrag = rb.drag; //DELETE THIS! ONLY FOR TESTING IN GAMEPLAY SCREEN
-        }
-        else
-        {
-            rb.drag = CarRbDragOnAir;
-        }
-
-        if (Car.GetComponent<CarGroundControl>().CarIsGrounded == true)
-        {
-
-            IsGrounded = true;
-
-            DriftController();
-            CarAllTurningInputs(DriftValToAxis);
-            
-
-            CarGoForwardInputs();
-
-            CarGoBackwardsBrakingInputs();
-
-        }
-        else
-        {
-            IsGrounded = false;
-
-            if (Speed < 0.5 && CooldownWait == false)
-            {
-                CooldownWait = true;
-                StartCoroutine(ReSpawnCooldownWait());
-            }
-        }
-
-
-        if (IsAcc == false && IsGrounded == true)
-        {
-            if (Speed > 1f && LoseSpeed > 0f && IsReverse == false)
-            {
-                StopAcceleratingForward(true);
-            }
-            else if (Speed > 1f && LoseSpeed < 0f && IsReverse == true)
-            {
-                StopAcceleratingForward(false);
-
-            }
-
-        }
-        
 
         Speed = Vector3.Distance(oldPosition, Car.transform.position) * 200f * SpeedLimiter; // Original = * 100f
 
@@ -399,7 +411,7 @@ public class CarController : MonoBehaviour
 
             ClutchWait = true;
 
-            if (Speed < MaxSpeed && IsGrounded == true )
+            if (Speed < MaxSpeed && IsGrounded)
             {
                 float addspeed = AddSpeed;
 
