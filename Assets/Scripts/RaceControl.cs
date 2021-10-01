@@ -5,12 +5,16 @@ using UnityEngine.UI;
 
 public class RaceControl : MonoBehaviour
 {
+    public GameObject LapController;
     public bool GameStart;
     public Text CountText;
 
     // Start is called before the first frame update
     void Awake()
     {
+        if (LapController == null)
+            LapController = GameObject.FindWithTag("LapController");
+
         GameStart = false;
     }
     void Start()
@@ -34,6 +38,7 @@ public class RaceControl : MonoBehaviour
         yield return new WaitForSeconds(1f);// 0 ->
         CountText.text = "GO!";
         GameStart = true;
+        LapController.GetComponent<LapControl>().GameStart = true;
         yield return new WaitForSeconds(1f);
         CountText.text = "";
         

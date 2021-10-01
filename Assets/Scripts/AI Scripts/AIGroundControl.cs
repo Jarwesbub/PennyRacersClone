@@ -4,12 +4,15 @@ using UnityEngine;
 
 public class AIGroundControl : MonoBehaviour
 {
+    public string AIName;
     public GameObject GameController;
-    public float DrunkLevel,AccNerfer;
-    private int AINumber, AICount, EngineClass, speedLimiter;
-    private int nextTarget, allTargets;
-    [SerializeField] //DEBUGGING
-    private float Steps, WaitSteps, Mass, AccLerp, TurnSpeed, AISpeed, MaxSpeedHolder, MaxSpeed;
+    GameObject LapController;
+    public float DrunkLevel, TargetDistance;
+    public int Lap, nextTarget, allTargets, MaxLaps;
+    private int AINumber, AICount, EngineClass;
+    //[SerializeField] //DEBUGGING
+    private float Mass, TurnSpeed, AISpeed, MaxSpeedHolder, MaxSpeed;
+    private float AccLerp, AccNerfer, Steps, WaitSteps;
     private GameObject Ground;
 
     Rigidbody rb;
@@ -17,18 +20,16 @@ public class AIGroundControl : MonoBehaviour
     private Vector3 randomizeTargetPos;
 
     private GameObject AIController;
-    private GameObject Target;
-    //private List SpawnPoints = array.ToList(Target);
+    //private GameObject Target;
     private static List<Vector3> targetPosList;
-    [SerializeField]//DEBUGGING
+    //[SerializeField]//DEBUGGING
     private bool IsGrounded;
-    public bool GameStart = false;
+    private bool GameStart = false, IsFinished=false;
 
     // Start is called before the first frame update
     void Awake()
     {
         GameStart = false;
-
         rb = GetComponent<Rigidbody>();
         Mass = rb.mass;
         Mass *=4f; //Original mass was 0.2f
@@ -42,8 +43,11 @@ public class AIGroundControl : MonoBehaviour
         if (GameController == null)
             GameController = GameObject.FindWithTag("GameController");
 
+        LapController = GameObject.FindWithTag("LapController");
+
         Ground = this.gameObject.transform.GetChild(AINumber).gameObject;
-        
+        Lap = 1;
+        MaxLaps = LapController.GetComponent<LapControl>().MaxLaps;
     }
 
 
@@ -69,7 +73,6 @@ public class AIGroundControl : MonoBehaviour
 
     public void AllTargets(List<Vector3> targetposlist, int targetcount)
     {
-
         targetPosList = targetposlist;
         allTargets = targetcount;
 
@@ -93,16 +96,16 @@ public class AIGroundControl : MonoBehaviour
                 float aispeed = AISpeed;
                 float turnspeed = TurnSpeed;
 
-                float singleStep = AISpeed * Time.deltaTime;
+                //float singleStep = AISpeed * Time.deltaTime;
                 Vector3 targetpos = targetPosList[nextTarget] + randomizeTargetPos;
-                Vector3 newDirection = Vector3.RotateTowards(transform.position, targetpos, singleStep, 0.0f);
+                //Vector3 newDirection = Vector3.RotateTowards(transform.position, targetpos, singleStep, 0.0f);
 
-                Vector3 targetDirection = targetpos - transform.position;
+                //Vector3 targetDirection = targetpos - transform.position;
                 Vector3 relativePos = targetpos - transform.position;
 
                 Quaternion rotation = Quaternion.LookRotation(relativePos, Vector3.up);
 
-                Vector3 turningCloseTarget = targetpos + new Vector3(10f, 10f, 10f);
+                //Vector3 turningCloseTarget = targetpos + new Vector3(10f, 10f, 10f);
 
                 if (Vector3.Distance(transform.position, targetpos) < 10.0f) //ai wont drive around the target
                 {
@@ -133,9 +136,9 @@ public class AIGroundControl : MonoBehaviour
 
 
                 }
+                TargetDistance = Vector3.Distance(transform.position, targetpos);
 
-
-                if (Vector3.Distance(transform.position, targetpos) < 5.0f) //5f normal
+                if (TargetDistance < 5.0f) //5f normal
                 {
                     // Swap the position of the cylinder.
 
@@ -145,28 +148,27 @@ public class AIGroundControl : MonoBehaviour
 
                     }
                     else
+                    {
                         nextTarget = 0;
-
+                        Lap++;
+                    }
                     targetPosRandomizer(AINumber);
 
                 }
 
             }
-            if (!IsGrounded)
+            if (!IsGrounded) // BUGI PAIKKAAAA!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             {
                 if (WaitSteps < Steps)
                 {
                     WaitSteps = 0f;
                     float posZ = transform.rotation.z;
-                    transform.rotation = Quaternion.Euler(0, posZ + 0f, 0);
+                    //transform.rotation = Quaternion.Euler(0, posZ + 0f, 0); //TÄÄLTÄ LÖYTYI KÄÄNTYMIS BUGI
 
                     Vector3 relativePos = targetPosList[nextTarget] + transform.position;
                     Quaternion rotation = Quaternion.LookRotation(relativePos, Vector3.up);
-                    Debug.Log("ReSpawn");
 
                 }
-
-                //StartCoroutine(AIRespawnTime());
 
             }
         }
@@ -175,23 +177,13 @@ public class AIGroundControl : MonoBehaviour
             GameStart = GameController.GetComponent<RaceControl>().GameStart;
 
         }
-        
-    }
-    private IEnumerator AIRespawnTime()
-    {
-        float waitTime = 2f;
-        yield return new WaitForSeconds(waitTime);
-
-        if(!IsGrounded)
+        if(Lap>MaxLaps && !IsFinished)
         {
-            float posZ = transform.rotation.z;
-            transform.rotation = Quaternion.Euler(0, posZ + 0f, 0);
-        }
-        else
-        {
-            
-        }
+            LapController.GetComponent<LapControl>().FinishedPlayers(AINumber, AIName);
+            IsFinished = true;
 
+
+        }
     }
 
 

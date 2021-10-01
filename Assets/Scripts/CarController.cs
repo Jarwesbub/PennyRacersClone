@@ -36,7 +36,7 @@ public class CarController : MonoBehaviour
     private float CarRbDrag, CarRbDragOnAir = 0f; //Fixes gravity inaccuracy when car is on ground/air (Changes rigidbody's "Drag" value)
 
     [SerializeField] //FOR DEBUGGING
-    private bool IsTurning = false, IsAcc = false, IsReverse = false, IsDrifting = false;
+    private bool /*IsTurning = false, */IsAcc = false, IsReverse = false, IsDrifting = false;
     public bool IsBraking = false, IsGrounded, IsHitting = false, IsOnGrass = false;
     private bool GameStart = false, CooldownWait = false, ClutchWait = false;
 
@@ -322,8 +322,6 @@ public class CarController : MonoBehaviour
                     if (DriftValToAxis < 0.5f || !IsGrounded)
                         DriftValToAxis = 0f;
                     
-
-                    IsTurning = false;
                     IsDrifting = false;
                     rotValue = 0f;
                 }
@@ -331,7 +329,6 @@ public class CarController : MonoBehaviour
 
                 if (horizontalInput > 0.01f) //TURN RIGHT
                 {
-                    IsTurning = true;
                     //rotValue *= horizontalInput; //Turning variable
                        /*
                     if (driftvalue < rotValue)
@@ -350,7 +347,6 @@ public class CarController : MonoBehaviour
                 }
                 if (horizontalInput < -0.01f) //TURN LEFT
                 {
-                    IsTurning = true;
                     //rotValue *= horizontalInput; //Turning variable
                     /*
                     if (driftvalue > rotValue)

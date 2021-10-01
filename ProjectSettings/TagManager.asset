@@ -25,6 +25,11 @@ TagManager:
   - ai10
   - ai11
   - ai12
+  - PlayerController
+  - AICars
+  - TargetController
+  - LapController
+  - TargetParent
   layers:
   - Default
   - TransparentFX
@@ -33,7 +38,7 @@ TagManager:
   - Water
   - UI
   - Walls
-  - 
+  - Goal
   - 
   - 
   - 
