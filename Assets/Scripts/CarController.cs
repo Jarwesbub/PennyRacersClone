@@ -36,8 +36,8 @@ public class CarController : MonoBehaviour
     private float CarRbDrag, CarRbDragOnAir = 0f; //Fixes gravity inaccuracy when car is on ground/air (Changes rigidbody's "Drag" value)
 
     [SerializeField] //FOR DEBUGGING
-    private bool /*IsTurning = false, */IsAcc = false, IsReverse = false, IsDrifting = false;
-    public bool IsBraking = false, IsGrounded, IsHitting = false, IsOnGrass = false;
+    private bool /*IsTurning = false, */IsReverse = false;
+    public bool IsDrifting = false, IsAcc = false, IsBraking = false, IsGrounded, IsHitting = false, IsOnGrass = false;
     private bool GameStart = false, CooldownWait = false, ClutchWait = false;
 
     public float horizontalInput, verticalInput; //Turning values from axis (between values of -1 to 1)
@@ -399,7 +399,8 @@ public class CarController : MonoBehaviour
 
     private void CarGoForwardInputs()
     {
-        if (Input.GetKey("w") || Input.GetKey("up")) //GAS GAS GAS/////////////////////////////
+        //if (Input.GetKey("w") || Input.GetKey("up")) //GAS GAS GAS/////////////////////////////
+        if(verticalInput > 0) // GAS
         {
             IsAcc = true;
             //LoseSpeed = AddSpeed;
@@ -456,7 +457,8 @@ public class CarController : MonoBehaviour
 
     private void CarGoBackwardsBrakingInputs()
     {
-        if (Input.GetKey("s") || Input.GetKey("down")/* && IsDrifting == false*/) //BREAKING
+        //if (Input.GetKey("s") || Input.GetKey("down")/* && IsDrifting == false*/) //BREAKING
+        if(verticalInput < 0)
         {
 
 
