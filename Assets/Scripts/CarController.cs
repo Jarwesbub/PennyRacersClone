@@ -1,14 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
+using TMPro;
 
 public class CarController : MonoBehaviour
 {
     public GameObject Car;
     public GameObject PlayerData;
     public GameObject GameController;
-    public Text SpeedTxt;
+    public TMP_Text SpeedTxt;
 
     Rigidbody rb;
     Collider col;
@@ -531,8 +531,8 @@ public class CarController : MonoBehaviour
     {
         float SpeedDecimal = Mathf.Round(Speed * 1f);
 
-        SpeedTxt.text = "Speed: " + SpeedDecimal.ToString();
-
+        //SpeedTxt.text = "Speed: " + SpeedDecimal.ToString();
+        SpeedTxt.text = SpeedDecimal.ToString();
 
     }
 

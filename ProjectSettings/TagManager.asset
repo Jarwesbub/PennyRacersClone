@@ -30,6 +30,7 @@ TagManager:
   - TargetController
   - LapController
   - TargetParent
+  - WrongWay
   layers:
   - Default
   - TransparentFX

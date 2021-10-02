@@ -1,13 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
+using TMPro;
 
 public class PosControl : MonoBehaviour
 {
     //0 = 1 in player/ai positions!
-    public Text PlayerPosTxt;
-
+    public TMP_Text PlayerPosTxt;
+    public TMP_Text LapsTxt, PosTxt, WrongWayTxt;
     public GameObject AICars;
     public List<GameObject> AI;
     public GameObject Player, TargetController;
@@ -17,7 +17,7 @@ public class PosControl : MonoBehaviour
     public int Lap, nextAILap, prevAILap;
     public float playerTargetDistance, nextAITargetDist/*, prevAITargetDist*/;
     public int AICount;
-    public bool PlayerIsLast; //debugging can be deleted later
+    public bool PlayerIsLast, IsWrongWay; //debugging can be deleted later
     private float Steps, waitSteps;
 
     // Start is called before the first frame update
@@ -35,6 +35,8 @@ public class PosControl : MonoBehaviour
         if (TargetController == null)
             TargetController = GameObject.FindWithTag("TargetController");
 
+
+
         int i;
         for (i = 0; i < AICars.transform.childCount; i++)
         {
@@ -46,6 +48,7 @@ public class PosControl : MonoBehaviour
         //PLAYER START LAST ->
         NextAI = AI[AICount];
         PrevAI = AI[AICount];
+        IsWrongWay = false;
     }
 
 
@@ -62,7 +65,7 @@ public class PosControl : MonoBehaviour
         else if (playerPos == 2)
             th = "rd";
         int playerposadd = playerPos + 1;
-        PlayerPosTxt.text = playerposadd.ToString()+th;
+        PlayerPosTxt.text = "Pos: "+playerposadd.ToString()+th;
         
         Lap = TargetController.GetComponent<TargetControl>().Laps;    
         nextAITarget = NextAI.GetComponent<AIGroundControl>().nextTarget;

@@ -1,10 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class TargetControl : MonoBehaviour
 {
     //public GameObject[] Target;
+    public TMP_Text WrongWayTxt;
     public List<GameObject> Target;
     public int TargetCount,PlayerTargetNumber;
     [SerializeField]//DEBUG
@@ -14,10 +16,13 @@ public class TargetControl : MonoBehaviour
     public List<GameObject> playerTargets;
     public float playerPos, aiPos;
     public int Laps, MaxLaps, PlayerPosition;
+    private int PlayerCurrentTarget;
     // Start is called before the first frame update
     void Awake()
     {
         Laps=1;
+        PlayerCurrentTarget = 0;
+        WrongWayTxt.text = " ";
         Player = GameObject.FindWithTag("Player");
         PlayerController = GameObject.FindWithTag("PlayerController");
         TargetParent = GameObject.FindWithTag("TargetParent");
@@ -87,6 +92,31 @@ public class TargetControl : MonoBehaviour
 
             playerTargets.Clear();
         }
+
+        if(PlayerCurrentTarget > playerTargets.Count && playerTargets.Count!=0)
+        {
+            StartCoroutine(WrongWay());
+        }
+
+        PlayerCurrentTarget = playerTargets.Count;
+
         return playerTargets.Count;
     }
+    private IEnumerator WrongWay()
+    {
+        while (PlayerCurrentTarget > playerTargets.Count)
+        {
+            float wait = 0.3f;
+            WrongWayTxt.text = "Wrong way";
+            yield return new WaitForSeconds(wait);
+            WrongWayTxt.text = " ";
+            yield return new WaitForSeconds(0.1f);
+            WrongWayTxt.text = "Wrong way";
+            yield return new WaitForSeconds(wait);
+            WrongWayTxt.text = " ";
+            yield return new WaitForSeconds(0.2f);
+        }
+
+    }
+
 }

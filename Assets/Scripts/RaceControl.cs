@@ -1,17 +1,18 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
+using TMPro;
 
 public class RaceControl : MonoBehaviour
 {
     public GameObject LapController;
     public bool GameStart;
-    public Text CountText;
+    public TMP_Text CountText;
 
     // Start is called before the first frame update
     void Awake()
     {
+        CountText.text = "";
         if (LapController == null)
             LapController = GameObject.FindWithTag("LapController");
 

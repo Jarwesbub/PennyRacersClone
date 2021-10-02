@@ -1,12 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
+using TMPro;
 
 public class LapControl : MonoBehaviour
 {
     public DataManager dataManager;
-    public Text LapsTxt, PosTxt;
+    public TMP_Text LapsTxt/*, PosTxt*/;
     public int MaxLaps;
     public int Laps;
     GameObject AIController;

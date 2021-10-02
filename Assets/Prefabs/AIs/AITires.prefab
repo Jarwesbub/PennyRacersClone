@@ -9,8 +9,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6236288292824006976}
+  - component: {fileID: 4468730787293328460}
   m_Layer: 0
-  m_Name: Tires
+  m_Name: AITires
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -32,6 +33,20 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4468730787293328460
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5380524990866357395}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d9fe1c75cb638844862de739c724140, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  frontWheels: {fileID: 7754977819160991538}
+  backWheels: {fileID: 9114308261832958833}
 --- !u!1001 &3631252891216328131
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -101,6 +116,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3665261a70bf9b44ea79e88065df5455, type: 3}
+--- !u!1 &9114308261832958833 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5483214257564227250, guid: 3665261a70bf9b44ea79e88065df5455, type: 3}
+  m_PrefabInstance: {fileID: 3631252891216328131}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &5188093964755117920 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8474370125072208547, guid: 3665261a70bf9b44ea79e88065df5455, type: 3}
@@ -175,6 +195,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: cc663ef588417214581916f55ca8d721, type: 3}
+--- !u!1 &7754977819160991538 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2010053880466369584, guid: cc663ef588417214581916f55ca8d721, type: 3}
+  m_PrefabInstance: {fileID: 8104810716965911298}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &1145384833054165646 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 9196116277571645836, guid: cc663ef588417214581916f55ca8d721, type: 3}

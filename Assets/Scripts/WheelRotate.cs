@@ -4,17 +4,22 @@ using UnityEngine;
 
 public class WheelRotate : MonoBehaviour
 {
+    public GameObject frontWheels, backWheels;
+    float Speed;
+    Vector3 oldPosition;
     // Start is called before the first frame update
     void Awake()
     {
-        
+        oldPosition = transform.position;
     }
 
     // Update is called once per frame
     void Update()
     {
-        //vec = Quaternion.Euler(0, -45, 0) * vec;
+        Speed = Vector3.Distance(oldPosition, transform.position) * 20000f; // Original = * 100f
 
-        //transform.rotation = Quaternion.Euler(0, +45, 0);
+        frontWheels.transform.Rotate(Vector3.forward * Time.deltaTime * -Speed, Space.Self);
+        backWheels.transform.Rotate(Vector3.forward * Time.deltaTime * -Speed, Space.Self);
+        oldPosition = transform.position;
     }
 }

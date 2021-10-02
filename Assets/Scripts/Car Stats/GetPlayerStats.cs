@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
+using TMPro;
 
 public class GetPlayerStats : MonoBehaviour
 {
@@ -9,7 +9,7 @@ public class GetPlayerStats : MonoBehaviour
     public GameObject PlayerController;
     public GameObject AIController;
 
-    public Text t_playername;
+    public TMP_Text t_playername;
 
     private int engineClass;
     private float enginePower, acc;
