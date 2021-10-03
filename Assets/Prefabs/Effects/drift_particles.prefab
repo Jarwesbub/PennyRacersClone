@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 5030454393977682433}
   - component: {fileID: 5030454393977682435}
   - component: {fileID: 5030454393977682432}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: drift_particles
   m_TagString: Untagged
   m_Icon: {fileID: 0}
