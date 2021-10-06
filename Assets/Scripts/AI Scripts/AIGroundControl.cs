@@ -25,10 +25,12 @@ public class AIGroundControl : MonoBehaviour
     //[SerializeField]//DEBUGGING
     private bool IsGrounded;
     private bool GameStart = false, IsFinished=false;
+    public bool RaceIsOver;
 
     // Start is called before the first frame update
     void Awake()
     {
+        RaceIsOver = false;
         GameStart = false;
         rb = GetComponent<Rigidbody>();
         Mass = rb.mass;
@@ -87,6 +89,8 @@ public class AIGroundControl : MonoBehaviour
         AISpeed = Vector3.Distance(oldPosition, gameObject.transform.position) * 200f; // Original = * 100f
         oldPosition = gameObject.transform.position;
 
+
+
         if (GameStart)
         {
             //if (IsGrounded)
@@ -95,6 +99,11 @@ public class AIGroundControl : MonoBehaviour
                 float maxspeed = MaxSpeed;
                 float aispeed = AISpeed;
                 float turnspeed = TurnSpeed;
+
+                if (RaceIsOver)
+                {
+                    maxspeed *= 0.7f;
+                }
 
                 //float singleStep = AISpeed * Time.deltaTime;
                 Vector3 targetpos = targetPosList[nextTarget] + randomizeTargetPos;
@@ -115,7 +124,7 @@ public class AIGroundControl : MonoBehaviour
 
                 transform.rotation = Quaternion.Lerp(transform.rotation, rotation, Time.deltaTime * turnspeed);
 
-                if (aispeed < (MaxSpeed/* / 2f*/)) //AI's speed 10f = 80km/h
+                if (aispeed < (maxspeed/* / 2f*/)) //AI's speed 10f = 80km/h
                 {
                     float acc = 0.001f; //This MUST BE 0.005f
                                         //acc = MaxSpeed * 0.00003f;

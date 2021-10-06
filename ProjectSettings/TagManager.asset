@@ -31,6 +31,14 @@ TagManager:
   - LapController
   - TargetParent
   - WrongWay
+  - PlayerCamera
+  - PlayerLights
+  - PlayerGround
+  - otherroute
+  - autopilotroute
+  - UIControl
+  - UIGameplay
+  - UIHighscores
   layers:
   - Default
   - TransparentFX

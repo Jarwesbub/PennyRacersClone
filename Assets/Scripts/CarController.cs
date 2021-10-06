@@ -36,9 +36,9 @@ public class CarController : MonoBehaviour
     private float CarRbDrag, CarRbDragOnAir = 0f; //Fixes gravity inaccuracy when car is on ground/air (Changes rigidbody's "Drag" value)
 
     [SerializeField] //FOR DEBUGGING
-    private bool /*IsTurning = false, */IsReverse = false;
-    public bool IsDrifting = false, IsAcc = false, IsBraking = false, IsGrounded, IsHitting = false, IsOnGrass = false;
-    private bool GameStart = false, CooldownWait = false, ClutchWait = false;
+    private bool IsReverse = false;
+    public bool GameStart = false, IsDrifting = false, IsAcc = false, IsBraking = false, IsGrounded, IsHitting = false, IsOnGrass = false, Autopilot = false;
+    private bool CooldownWait = false, ClutchWait = false;
 
     public float horizontalInput, verticalInput; //Turning values from axis (between values of -1 to 1)
     private bool horizontalInputIsNegative;
@@ -49,7 +49,7 @@ public class CarController : MonoBehaviour
         if (GameController == null)
             GameObject.FindWithTag("GameController");
 
-
+        Autopilot = false;
         Speed = 0f;
         SpeedLimiter = 1f;
         AddSpeed = 750f; //MUST BE 750f for this build
@@ -202,75 +202,83 @@ public class CarController : MonoBehaviour
 
         if (GameStart)
         {
-            if (IsHitting == false)
+            if (!Autopilot)
             {
-                horizontalInput = Input.GetAxis("Horizontal");
-                verticalInput = Input.GetAxis("Vertical");
-            }
-            else
-            {
-                horizontalInput = 0f;
-            }
-            float newEulerAngles = Car.transform.rotation.eulerAngles.y;
-
-            if (oldEulerAngles < newEulerAngles - 0.2f)//When rotating RIGHT
-            {
-                horizontalInputIsNegative = false;
-            }
-            else if (oldEulerAngles > newEulerAngles + 0.2f)//When rotating LEFT
-            {
-                horizontalInputIsNegative = true;
-            }
-
-            oldEulerAngles = Car.transform.rotation.eulerAngles.y;
-
-            if (IsGrounded == true)
-            {
-                rb.drag = CarRbDrag;
-                CarRbDrag = rb.drag; //DELETE THIS! ONLY FOR TESTING IN GAMEPLAY SCREEN
-            }
-            else
-            {
-                rb.drag = CarRbDragOnAir;
-            }
-
-            if (Car.GetComponent<CarGroundControl>().CarIsGrounded == true)
-            {
-
-                IsGrounded = true;
-
-                DriftController();
-                CarAllTurningInputs(DriftValToAxis);
-
-
-                CarGoForwardInputs();
-
-                CarGoBackwardsBrakingInputs();
-
-            }
-            else
-            {
-                IsGrounded = false;
-
-                if (Speed < 0.5 && CooldownWait == false)
+                if (IsHitting == false)
                 {
-                    CooldownWait = true;
-                    StartCoroutine(ReSpawnCooldownWait());
+                    horizontalInput = Input.GetAxis("Horizontal");
+                    verticalInput = Input.GetAxis("Vertical");
                 }
-            }
-
-
-            if (IsAcc == false && IsGrounded == true)
-            {
-                if (Speed > 1f && LoseSpeed > 0f && IsReverse == false)
+                else
                 {
-                    StopAcceleratingForward(true);
+                    horizontalInput = 0f;
                 }
-                else if (Speed > 1f && LoseSpeed < 0f && IsReverse == true)
+                float newEulerAngles = Car.transform.rotation.eulerAngles.y;
+
+                if (oldEulerAngles < newEulerAngles - 0.2f)//When rotating RIGHT
                 {
-                    StopAcceleratingForward(false);
+                    horizontalInputIsNegative = false;
+                }
+                else if (oldEulerAngles > newEulerAngles + 0.2f)//When rotating LEFT
+                {
+                    horizontalInputIsNegative = true;
+                }
+
+                oldEulerAngles = Car.transform.rotation.eulerAngles.y;
+
+                if (IsGrounded == true)
+                {
+                    rb.drag = CarRbDrag;
+                    CarRbDrag = rb.drag; //DELETE THIS! ONLY FOR TESTING IN GAMEPLAY SCREEN
+                }
+                else
+                {
+                    rb.drag = CarRbDragOnAir;
+                }
+
+                if (Car.GetComponent<CarGroundControl>().CarIsGrounded == true)
+                {
+
+                    IsGrounded = true;
+
+                    DriftController();
+                    CarAllTurningInputs(DriftValToAxis);
+
+
+                    CarGoForwardInputs();
+
+                    CarGoBackwardsBrakingInputs();
 
                 }
+                else
+                {
+                    IsGrounded = false;
+
+                    if (Speed < 0.5 && CooldownWait == false)
+                    {
+                        CooldownWait = true;
+                        StartCoroutine(ReSpawnCooldownWait());
+                    }
+                }
+
+
+                if (IsAcc == false && IsGrounded == true)
+                {
+                    if (Speed > 1f && LoseSpeed > 0f && IsReverse == false)
+                    {
+                        StopAcceleratingForward(true);
+                    }
+                    else if (Speed > 1f && LoseSpeed < 0f && IsReverse == true)
+                    {
+                        StopAcceleratingForward(false);
+
+                    }
+
+                }
+            }
+            else //Autopilot ON
+            {
+                AutopilotON();
 
             }
         }
@@ -527,7 +535,15 @@ public class CarController : MonoBehaviour
         }
     }
 
-
+    private void AutopilotON() //When player finishes race -> no more player control -> "watch your car gameplay on the background"
+    {
+        //Turning will be done at CarGroundControl -script (towards next target)
+        if (Speed < MaxSpeed && IsGrounded)
+        {
+            float addspeed = 750f + (Speed * EnginePower);
+            rb.AddRelativeForce(new Vector3(0, -1f, CarMass * 0.6f * addspeed * Time.deltaTime)); //CarMass = rb.mass*10f
+        }
+    }
 
     void Update() // UI STUFF
     {

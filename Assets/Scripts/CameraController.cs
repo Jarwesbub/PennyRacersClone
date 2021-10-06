@@ -8,7 +8,8 @@ public class CameraController : MonoBehaviour
     public GameObject CameraPosition; //Where camera "sits"
     public GameObject CameraLookAtPosition; //Where camera looks
     public GameObject BackCamera;
-    public GameObject AICars;
+    public GameObject AICars, PlayerCamera;
+
 
     public float GroundTime;
     public float AirTime;
@@ -19,6 +20,9 @@ public class CameraController : MonoBehaviour
     private bool holdbutton = false;
     private void Awake()
     {
+        if(PlayerCamera == null)
+            PlayerCamera = GameObject.FindWithTag("PlayerCamera");
+
         CameraOffset = CameraPosition.transform.position;
         gameObject.transform.position = CameraOffset;
         CamSet = 1;
@@ -111,11 +115,11 @@ public class CameraController : MonoBehaviour
         GameObject backcamera;
         if (number == -1) // PLAYER
         {
-            cameraposition = Player.transform.transform.GetChild(1).gameObject;
+            cameraposition = PlayerCamera.transform.GetChild(0).gameObject;
             CameraPosition = cameraposition;
-            cameralookatposition = Player.transform.GetChild(2).gameObject;
+            cameralookatposition = PlayerCamera.transform.GetChild(1).gameObject;
             CameraLookAtPosition = cameralookatposition;
-            backcamera = Player.transform.GetChild(3).gameObject;
+            backcamera = PlayerCamera.transform.GetChild(2).gameObject;
             BackCamera = backcamera;
         }
         else // AI
@@ -171,7 +175,7 @@ public class CameraController : MonoBehaviour
         }
         else if (LookCommander == 1)//WHEN CAMERA RESETS
         {
-            gameObject.transform.position = FixedCameraPosition; ;
+            gameObject.transform.position = FixedCameraPosition;
             LookCommander = 0;
         }
         else if (LookCommander == 0) //NORMAL
