@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+
 public class CameraController : MonoBehaviour
 {
     public GameObject Player; //Controlled character
@@ -52,7 +53,9 @@ public class CameraController : MonoBehaviour
 
         }
     }
-    void Update()
+
+    
+    void Update() //Look AI perspective
     {
         if(Input.GetKey("enter"))
         {
@@ -108,6 +111,8 @@ public class CameraController : MonoBehaviour
         }
 
     }
+    
+
     private void CameraFollow(int number)
     {
         GameObject cameraposition;

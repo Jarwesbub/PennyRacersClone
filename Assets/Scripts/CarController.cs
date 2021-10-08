@@ -43,7 +43,6 @@ public class CarController : MonoBehaviour
     public float horizontalInput, verticalInput; //Turning values from axis (between values of -1 to 1)
     private bool horizontalInputIsNegative;
 
-
     void Awake()
     {
         if (GameController == null)

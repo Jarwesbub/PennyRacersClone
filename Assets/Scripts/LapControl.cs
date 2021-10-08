@@ -12,13 +12,13 @@ public class LapControl : MonoBehaviour
     public int MaxLaps;
     public int Laps;
     GameObject AIController;
-    public List<float> LapTimes;
+    public List<string> LapTimes;
     public List<string> Leaderboard;
-    public TMP_Text leaderboards, laptimes;
+    public TMP_Text playtime,leaderboards, laptimes;
     public float CurrentTime;
     public string PlayerName;
     public bool GameStart = false;
-    private bool GameEnd = false;
+    private int SkipFrames;
 
     // Start is called before the first frame update
     void Awake()
@@ -39,18 +39,25 @@ public class LapControl : MonoBehaviour
         DrawLaps(1);
         dataManager.Load();
         PlayerName = dataManager.data.name;
+
+        //CurrentTime = 200f; //TESTING DELETE!!!!!!!!!!!!!!!!!
     }
     void Update()
     {
         if(GameStart)
         {
             CurrentTime += Time.deltaTime;
-        }
-        else if (GameEnd)
-        {
-            
+            SkipFrames++;
+
+            if (SkipFrames > 50)
+            {
+                SkipFrames = 0;
+                ShowTime();
+            }
 
         }
+
+
     }
 
     public void DrawLaps(int laps)
@@ -62,24 +69,52 @@ public class LapControl : MonoBehaviour
 
 
     }
+    private void ShowTime()
+    {
+        float curtime = (Mathf.Round(CurrentTime * 100f) / 100f);
+
+        string calculatedTime = ConvertTime(curtime); //Can cause crashing!
+        playtime.text = calculatedTime;
+
+    }
+
+    private string ConvertTime(float curtime) //Can cause crashing in update!
+    {
+        int minutes = 0;
+        string result;
+
+        while (curtime > 60f)
+        {
+            minutes++;
+            curtime -= 60f;
+        }
+
+        string front = "";
+        string second = "";
+
+        if (curtime < 10)
+        {
+            second = "0";
+        }
+        if (minutes < 10)
+        {
+            front = "0";
+        }
+
+        result = (front + minutes + "," + second + string.Format("{00:F2}", curtime).ToString());
+        return result;
+    }
 
     public void FinishedPlayers(int number, string name) //-1 = player
     {
-        //Leaderboards.Add(number);
-        int minutes = 0;
-        
-        LapTimes.Add(Mathf.Round(CurrentTime * 100f) / 100f);
-        for (float i = CurrentTime; i > 60f; i-=60f)
-        {
-            minutes++;
-        }
+        //Calculate times
+        //int minutes = 0;
+        float curtime = Mathf.Round(CurrentTime * 100f) / 100f;
 
-        string front = "0"; // When time is "01" (digits)
+        string calculatedTime = ConvertTime(curtime);
+        LapTimes.Add(calculatedTime);
 
-        if (minutes >= 10) //When time is "10" (digits)
-        {
-            front = "";
-        }
+        //Calculate car positions in leaderboard
 
         string pos = (1+Leaderboard.Count).ToString();
         string space = "  ";
@@ -104,7 +139,7 @@ public class LapControl : MonoBehaviour
             GameObject ai = AICars.gameObject.transform.GetChild(number).gameObject;
             ai.GetComponent<AIGroundControl>().RaceIsOver = true;
         }
-
+        //Add leaderboard results in loop command
         string result = "";
         foreach (var listMember in Leaderboard)
         {
@@ -112,20 +147,22 @@ public class LapControl : MonoBehaviour
         }
         leaderboards.text = result;
 
-        string times = "";
+        //Add all laptimes to single string "alltimes" in loop command
+        string allTimes = "";
         foreach (var listMember in LapTimes)
         {
-            string mins = minutes.ToString();
+            //string mins = minutes.ToString();
             //times += listMember.ToString() + "\n";
-            times += front + mins + "," + string.Format("{0:F2}", listMember).ToString()+"\n";
+            allTimes += string.Format("{0:F2}", listMember).ToString()+"\n";
+            
         }
-        laptimes.text = times;
+        laptimes.text = allTimes;
     }
 
     IEnumerator WaitHighscores()
     {
         yield return new WaitForSeconds(0.2f);
-
+        //Hide player UI -> show highscores UI
         UIGameplay.SetActive(false);
         UIHighscores.SetActive(true);
 
