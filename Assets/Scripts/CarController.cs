@@ -7,14 +7,17 @@ public class CarController : MonoBehaviour
 {
     public GameObject Car;
     public GameObject PlayerData;
-    public GameObject GameController;
+    private GameObject GameController, AIController;
     public TMP_Text SpeedTxt;
 
     Rigidbody rb;
     Collider col;
-    float oldEulerAngles; 
+    float oldEulerAngles;
 
-    public PhysicMaterial normalFriction, driftFriction,grassFriction;
+    //MOBILE
+    public FixedJoystick joystick;
+    public bool useUIjoystick = false;
+
     //slide power speed nerf
     public float TEST; //DELETE WHEN NOT IN TEST USE!
     public float Steps, driftWaitSteps; //How many steps/fixed frames
@@ -35,7 +38,7 @@ public class CarController : MonoBehaviour
     private float LoseSpeed, AccLerpTime, HoldTurningValue, FrictionLevel;
     private float CarRbDrag, CarRbDragOnAir = 0f; //Fixes gravity inaccuracy when car is on ground/air (Changes rigidbody's "Drag" value)
 
-    [SerializeField] //FOR DEBUGGING
+    //[SerializeField] //FOR DEBUGGING
     private bool IsReverse = false;
     public bool GameStart = false, IsDrifting = false, IsAcc = false, IsBraking = false, IsGrounded, IsHitting = false, IsOnGrass = false, Autopilot = false;
     private bool CooldownWait = false, ClutchWait = false;
@@ -45,17 +48,17 @@ public class CarController : MonoBehaviour
 
     void Awake()
     {
-        if (GameController == null)
-            GameObject.FindWithTag("GameController");
-
+        GameController = GameObject.FindWithTag("GameController");
+        AIController = GameObject.FindWithTag("aicontroller");
+        if (useUIjoystick)
+        {
+            joystick = GameObject.FindWithTag("Joystick").GetComponent<FixedJoystick>();
+        }
         Autopilot = false;
         Speed = 0f;
         SpeedLimiter = 1f;
         AddSpeed = 750f; //MUST BE 750f for this build
         ReverseMaxSpeed = 50f;
-        FrictionLevel = 1;
-
-        //IsGrounded = false; //TESTING DELETE THIS
 
         IsBraking = false;
         IsAcc = false;
@@ -68,42 +71,6 @@ public class CarController : MonoBehaviour
         oldEulerAngles = Car.transform.rotation.eulerAngles.y;
 
         //HoldTurningValue = Turning;
-    }
-
-    public void GetFrictionValues(int FricLvl) //These values are easily changeable
-    {
-        //var DynMat = col.material.dynamicFriction;
-        FrictionLevel = FricLvl;
-
-        if (FricLvl == 0) // DRIFT
-        {
-            col.material = driftFriction;
-        }
-        else if (FricLvl == 1)
-        {
-            //DynFriction = 0.6f; normal values
-            //StatFriction = 0.6f;
-            col.material = normalFriction;
-        }
-        else if (FricLvl == 2) //Enemy hit
-        {
-            IsHitting = true;
-            Debug.Log("HIT");
-            col.material = normalFriction;
-            StartCoroutine(SpeedLimitTimer(1.0f,0.2f)); //SpeedLimit value, time
-        }
-        else if (FricLvl == 3) //Wall hit
-        {
-            Debug.Log("HIT");
-            col.material = normalFriction;
-            StartCoroutine(SpeedLimitTimer(0.1f,0.4f)); //SpeedLimit value, time
-        }
-        else if (FricLvl == -1) //Car is upsidedown
-        {
-            IsOnGrass = false;
-            col.material = normalFriction;
-        }
-
     }
 
     void DriftController()
@@ -173,8 +140,6 @@ public class CarController : MonoBehaviour
                     IsDrifting = true;
 
                     DriftValToAxis = DriftVal;
-
-                    GetFrictionValues(0); //Drift
                 }
 
         }
@@ -183,13 +148,6 @@ public class CarController : MonoBehaviour
             IsDrifting = false;
             
         }
-        
-        if (IsDrifting == false)
-        {
-            GetFrictionValues(1); //Normal
-
-        }
-        
 
 
     }
@@ -205,8 +163,17 @@ public class CarController : MonoBehaviour
             {
                 if (IsHitting == false)
                 {
-                    horizontalInput = Input.GetAxis("Horizontal");
-                    verticalInput = Input.GetAxis("Vertical");
+                    if (!useUIjoystick)
+                    {
+                        horizontalInput = Input.GetAxis("Horizontal");
+                        verticalInput = Input.GetAxis("Vertical");
+                    }
+                    else
+                    {
+                        horizontalInput = joystick.Horizontal;
+                        verticalInput = joystick.Vertical;
+
+                    }
                 }
                 else
                 {
@@ -277,7 +244,7 @@ public class CarController : MonoBehaviour
             }
             else //Autopilot ON
             {
-                AutopilotON();
+                //AutopilotON();
 
             }
         }
@@ -407,7 +374,7 @@ public class CarController : MonoBehaviour
     private void CarGoForwardInputs()
     {
         //if (Input.GetKey("w") || Input.GetKey("up")) //GAS GAS GAS/////////////////////////////
-        if(verticalInput > 0) // GAS
+        if(verticalInput > 0.01f) // GAS
         {
             IsAcc = true;
             //LoseSpeed = AddSpeed;
@@ -465,7 +432,7 @@ public class CarController : MonoBehaviour
     private void CarGoBackwardsBrakingInputs()
     {
         //if (Input.GetKey("s") || Input.GetKey("down")/* && IsDrifting == false*/) //BREAKING
-        if(verticalInput < 0)
+        if(verticalInput < -0.4f)
         {
 
 
@@ -534,14 +501,17 @@ public class CarController : MonoBehaviour
         }
     }
 
-    private void AutopilotON() //When player finishes race -> no more player control -> "watch your car gameplay on the background"
+    public void AutopilotON() //When player finishes race -> no more player control -> "watch your car gameplay on the background"
     {
+        Autopilot = true;
+        AIController.GetComponent<AIController>().PlayerAutopilot();
+        /*
         //Turning will be done at CarGroundControl -script (towards next target)
         if (Speed < MaxSpeed && IsGrounded)
         {
             float addspeed = 750f + (Speed * EnginePower);
             rb.AddRelativeForce(new Vector3(0, -1f, CarMass * 0.6f * addspeed * Time.deltaTime)); //CarMass = rb.mass*10f
-        }
+        }*/
     }
 
     void Update() // UI STUFF

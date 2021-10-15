@@ -10,10 +10,14 @@ public class GoMenuScript : MonoBehaviour
     {
         if (Input.GetKeyDown("backspace"))
         {
-            SceneManager.LoadScene("1MenuScene");
+            GoMenuScene();
 
         }
 
     }
+    public void GoMenuScene()
+    {
+        SceneManager.LoadScene("1MenuScene");
 
+    }
 }

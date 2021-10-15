@@ -10,7 +10,7 @@ public class AIGroundControl : MonoBehaviour
     public float DrunkLevel, TargetDistance;
     public int Lap, nextTarget, allTargets, MaxLaps;
     private int AINumber, AICount, EngineClass;
-    //[SerializeField] //DEBUGGING
+    [SerializeField] //DEBUGGING
     private float Mass, TurnSpeed, AISpeed, MaxSpeedHolder, MaxSpeed;
     private float AccLerp, AccNerfer, Steps, WaitSteps;
     private GameObject Ground;
@@ -46,13 +46,13 @@ public class AIGroundControl : MonoBehaviour
             GameController = GameObject.FindWithTag("GameController");
 
         LapController = GameObject.FindWithTag("LapController");
-
-        Ground = this.gameObject.transform.GetChild(AINumber).gameObject;
+        if(gameObject.tag != "Player")
+            Ground = this.gameObject.transform.GetChild(AINumber).gameObject;
+        else
+            Ground = GameObject.FindWithTag("PlayerGround");
         Lap = 1;
         MaxLaps = LapController.GetComponent<LapControl>().MaxLaps;
     }
-
-
 
     public void AIControllerStartUp(int AInumber, int AIcount, int engineclass, float accLerp, float turnspeed, float maxspeed)
     {
@@ -81,7 +81,6 @@ public class AIGroundControl : MonoBehaviour
         targetPosRandomizer(AINumber);
 
     }
-
 
     void FixedUpdate()
     {
@@ -188,7 +187,9 @@ public class AIGroundControl : MonoBehaviour
         }
         if(Lap>MaxLaps && !IsFinished)
         {
-            LapController.GetComponent<LapControl>().FinishedPlayers(AINumber, AIName);
+            if(!RaceIsOver)
+                LapController.GetComponent<LapControl>().FinishedPlayers(AINumber, AIName);
+
             IsFinished = true;
 
 
@@ -216,11 +217,7 @@ public class AIGroundControl : MonoBehaviour
 
     void OnCollisionEnter(Collision other)
     {
-        if (other.gameObject.tag == "Player")
-        {
-            //Debug.Log("Hit Player");
-        }
-        else if (other.gameObject.tag == "wall")// WALLS
+        if (other.gameObject.tag == "wall")// WALLS
         {
             float maxspeed = MaxSpeed -= 20f;
             MaxSpeed = maxspeed;

@@ -8,4 +8,5 @@ public class PlayerData
 
     public int EngineClass, AccLvl, AIEngineClass;
     public float EnginePower;
+    public bool UIJoystick;
 }

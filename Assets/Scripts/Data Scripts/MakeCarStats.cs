@@ -2,23 +2,27 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 using UnityEngine.SceneManagement;
 
 public class MakeCarStats : MonoBehaviour
 {
+    public GameObject UIJoystickButton;
+
     public InputField playerName;
     public int EngineClass,AIEngineClass;
 
-    public Text t_engineclass;
-    public Text t_acc;
-    public Text t_aiengineclass;
+    public TMP_Text t_engineclass;
+    public TMP_Text t_acc;
+    public TMP_Text t_aiengineclass;
 
     public DataManager dataManager;
-
+    
 
     void Start()
     {
         dataManager.Load();
+        UIJoystickButton.GetComponent<Toggle>().isOn = dataManager.data.UIJoystick;
         playerName.text = dataManager.data.name;
         //t_engineclass.text = ("Engine Power =") + dataManager.data.EngineClass.ToString();
         AIEngineClass = dataManager.data.AIEngineClass;
@@ -48,9 +52,9 @@ public class MakeCarStats : MonoBehaviour
         }
         
         
-        t_engineclass.text = ("Engine Power = ") + dataManager.data.EngineClass.ToString();
-        t_acc.text = ("Acceleration = ") + dataManager.data.AccLvl.ToString();
-        t_aiengineclass.text = ("AI's Engine Power = ") + dataManager.data.AIEngineClass.ToString();
+        t_engineclass.text = ("Engine Power\n") + dataManager.data.EngineClass.ToString();
+        t_acc.text = ("Acceleration\n") + dataManager.data.AccLvl.ToString();
+        t_aiengineclass.text = ("AI's Engine Power\n") + dataManager.data.AIEngineClass.ToString();
     }
 
     public void ClickForEngineClass()
@@ -63,7 +67,7 @@ public class MakeCarStats : MonoBehaviour
             engineClass = 1;
 
         dataManager.data.EngineClass = engineClass;
-        t_engineclass.text = ("Engine Power = ") + dataManager.data.EngineClass.ToString();
+        t_engineclass.text = ("Engine Power\n") + dataManager.data.EngineClass.ToString();
 
         ClickForAIEnginePower(true);
 
@@ -79,7 +83,7 @@ public class MakeCarStats : MonoBehaviour
             Acc = 1;
 
         dataManager.data.AccLvl = Acc;
-        t_acc.text = ("Acceleration = ") + dataManager.data.AccLvl.ToString();
+        t_acc.text = ("Acceleration\n") + dataManager.data.AccLvl.ToString();
 
     }
 
@@ -99,19 +103,40 @@ public class MakeCarStats : MonoBehaviour
 
         
         dataManager.data.AIEngineClass = aiengineclass;
-        t_aiengineclass.text = ("AI's Engine Power = ") + dataManager.data.AIEngineClass.ToString();
+        t_aiengineclass.text = ("AI's Engine Power\n") + dataManager.data.AIEngineClass.ToString();
 
         
     }
 
-    public void ClickSaveAndContinue()
+    public void ButtonGoMap1()
     {
         dataManager.data.name = playerName.text;
         dataManager.Save();
-        //SceneManager.LoadScene("TestScene");
         SceneManager.LoadScene("Map1");
 
     }
+    public void ButtonGoTestmap()
+    {
+        dataManager.data.name = playerName.text;
+        dataManager.Save();
+        SceneManager.LoadScene("Map2");
+    }
+    
+    public void ToggleButtonUseUIJoystick()
+    {
+        bool joystick = UIJoystickButton.GetComponent<Toggle>().isOn;
+        Debug.Log(joystick);
 
+        if (joystick)
+        {
+            dataManager.data.UIJoystick = true;
+            dataManager.Save();
+        }
+        else
+        {
+            dataManager.data.UIJoystick = false;
+            dataManager.Save();
+        }
+    }
 
 }

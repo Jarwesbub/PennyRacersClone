@@ -17,7 +17,7 @@ public class PosControl : MonoBehaviour
     public int Lap, nextAILap, prevAILap;
     public float playerTargetDistance, nextAITargetDist/*, prevAITargetDist*/;
     public int AICount;
-    public bool PlayerIsLast, IsWrongWay; //debugging can be deleted later
+    public bool PlayerIsLast; //debugging can be deleted later
     private float Steps, waitSteps;
 
     // Start is called before the first frame update
@@ -29,7 +29,6 @@ public class PosControl : MonoBehaviour
         if (AICars == null)
             AICars = GameObject.FindWithTag("AICars");
 
-        if (Player == null)
             Player = GameObject.FindWithTag("Player");
 
         if (TargetController == null)
@@ -48,7 +47,6 @@ public class PosControl : MonoBehaviour
         //PLAYER START LAST ->
         NextAI = AI[AICount];
         PrevAI = AI[AICount];
-        IsWrongWay = false;
     }
 
 

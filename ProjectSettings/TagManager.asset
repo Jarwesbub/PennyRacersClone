@@ -39,6 +39,8 @@ TagManager:
   - UIControl
   - UIGameplay
   - UIHighscores
+  - Joystick
+  - DataManager
   layers:
   - Default
   - TransparentFX

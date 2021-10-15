@@ -26,7 +26,8 @@ public class CarParticles : MonoBehaviour
         {
             float playerinput = PlayerController.GetComponent<CarController>().verticalInput;
             bool IsBraking = PlayerController.GetComponent<CarController>().IsBraking;
-            if (playerinput == 1 || IsBraking)
+            float scale = 0.8f;
+            if (playerinput >= scale || playerinput <= -scale || IsBraking)
             {
                 left_drift.Play();
                 right_drift.Play();

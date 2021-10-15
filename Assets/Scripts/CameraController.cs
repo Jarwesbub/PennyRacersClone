@@ -9,21 +9,25 @@ public class CameraController : MonoBehaviour
     public GameObject CameraPosition; //Where camera "sits"
     public GameObject CameraLookAtPosition; //Where camera looks
     public GameObject BackCamera;
-    public GameObject AICars, PlayerCamera;
+    public GameObject AICars/*, PlayerCamera*/;
 
 
     public float GroundTime;
     public float AirTime;
     private int CamSet;
     Vector3 CameraOffset, FixedCameraPosition;
-
+    //[SerializeField]//DEBUG
     private int LookCommander = 0;
     private bool holdbutton = false;
+    public bool useUIjoystick = false;
+    private int backCameraButton = -1; //-1=not in use
+
     private void Awake()
     {
+        /*
         if(PlayerCamera == null)
             PlayerCamera = GameObject.FindWithTag("PlayerCamera");
-
+        */
         CameraOffset = CameraPosition.transform.position;
         gameObject.transform.position = CameraOffset;
         CamSet = 1;
@@ -31,26 +35,41 @@ public class CameraController : MonoBehaviour
         CameraFollow(-1);//player
 
     }
+    public void ButtonLookBack()
+    {
+        useUIjoystick = true;
+
+        if (backCameraButton<=0)
+            backCameraButton = 1;
+        else
+            backCameraButton = 0;
+
+
+        Follow(CamSet);
+
+    }
 
     private void FixedUpdate()
     {
-        if (Input.GetKey(KeyCode.LeftShift))
-        {
-            FixedCameraPosition = BackCamera.transform.position;
-            LookCommander = 2;
-            Follow(CamSet);
-        }
-        else if (LookCommander == 2)
-        {
-            FixedCameraPosition = CameraPosition.transform.position;
-            LookCommander = 1;
-            Follow(CamSet);
-        }
-        else if (LookCommander == 0)//reset
-        {
-            FixedCameraPosition = CameraPosition.transform.position;
-            Follow(CamSet);
 
+        {
+            if (Input.GetKey(KeyCode.LeftShift) || backCameraButton == 1)
+            {
+                FixedCameraPosition = BackCamera.transform.position;
+                LookCommander = 2;
+                Follow(CamSet);
+            }
+            else if (LookCommander == 2/* || backCameraButton == -1*/)
+            {
+                FixedCameraPosition = CameraPosition.transform.position;
+                LookCommander = 1;
+                Follow(CamSet);
+            }
+            else if (LookCommander == 0 || backCameraButton == 0)//reset
+            {
+                FixedCameraPosition = CameraPosition.transform.position;
+                Follow(CamSet);
+            }
         }
     }
 
@@ -120,11 +139,11 @@ public class CameraController : MonoBehaviour
         GameObject backcamera;
         if (number == -1) // PLAYER
         {
-            cameraposition = PlayerCamera.transform.GetChild(0).gameObject;
+            cameraposition = Player.transform.GetChild(0).gameObject;
             CameraPosition = cameraposition;
-            cameralookatposition = PlayerCamera.transform.GetChild(1).gameObject;
+            cameralookatposition = Player.transform.GetChild(1).gameObject;
             CameraLookAtPosition = cameralookatposition;
-            backcamera = PlayerCamera.transform.GetChild(2).gameObject;
+            backcamera = Player.transform.GetChild(2).gameObject;
             BackCamera = backcamera;
         }
         else // AI

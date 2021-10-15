@@ -16,12 +16,16 @@ public class TargetControl : MonoBehaviour
     public List<GameObject> playerTargets;
     public float playerPos, aiPos;
     public int Laps, MaxLaps, PlayerPosition;
+    //[SerializeField]
+    private bool IsWrongWay = false;
     private int PlayerCurrentTarget;
     // Start is called before the first frame update
     void Awake()
     {
+        IsWrongWay = false;
+
         Laps=1;
-        PlayerCurrentTarget = 0;
+        //PlayerCurrentTarget = 0;
         WrongWayTxt.text = " ";
         Player = GameObject.FindWithTag("Player");
         PlayerController = GameObject.FindWithTag("PlayerController");
@@ -68,11 +72,14 @@ public class TargetControl : MonoBehaviour
             if (playerTargets.Contains(objects))
             {
                 playerTargets.Remove(objects);
-
+                IsWrongWay = true;
+                //Debug.Log("Removed");
             }
             else
             {
                 playerTargets.Add(objects);
+                IsWrongWay = false;
+                //Debug.Log("Added");
             }
         }
         else //DESTROY ALL OBJECTS
@@ -85,7 +92,6 @@ public class TargetControl : MonoBehaviour
                 {
                     string name = "player";
                     LapController.GetComponent<LapControl>().FinishedPlayers(-1, name);
-
                 }
 
             }
@@ -93,18 +99,20 @@ public class TargetControl : MonoBehaviour
             playerTargets.Clear();
         }
 
-        if(PlayerCurrentTarget > playerTargets.Count && playerTargets.Count!=0)
+        //if(PlayerCurrentTarget-1 > playerTargets.Count/* && playerTargets.Count!=0*/)
+        if(IsWrongWay)
         {
             StartCoroutine(WrongWay());
         }
 
-        PlayerCurrentTarget = playerTargets.Count;
+        //PlayerCurrentTarget = playerTargets.Count;
 
         return playerTargets.Count;
     }
     private IEnumerator WrongWay()
     {
-        while (PlayerCurrentTarget > playerTargets.Count)
+        //while (PlayerCurrentTarget > playerTargets.Count)
+        if(IsWrongWay)
         {
             float wait = 0.3f;
             WrongWayTxt.text = "Wrong way";

@@ -9,16 +9,18 @@ public class CarGroundControl : MonoBehaviour
     public GameObject MainCamera;
     private GameObject TargetController;
     public List<Vector3> targetPosList;
-    public List<GameObject> TargetsCache;
-    public int nextTarget;
+    public int nextTarget, targetCount;
     public float TargetDistance;
     public bool CarIsGrounded, Autopilot;
-    private bool targetTriggerBug = false;
+    private int targetTriggerBug = 2;
+
     void Awake()
     {
         Autopilot = false;
         nextTarget = 0;
         TargetController = GameObject.FindWithTag("TargetController");
+        MainCamera = GameObject.FindWithTag("MainCamera");
+        targetCount = targetPosList.Count;
     }
     public void LoadAllTargets(Vector3 targetpos)//From TargetControl script
     {
@@ -32,46 +34,31 @@ public class CarGroundControl : MonoBehaviour
     }
     void Update()
     {
-        if (targetPosList[nextTarget] != null)
+        
+        if (nextTarget < targetCount)
         {
             Vector3 targetpos = targetPosList[nextTarget];
             TargetDistance = Vector3.Distance(transform.position, targetpos);
 
-            if (Autopilot) //Turning control is here; Gas control is at CarController
+            /*
+            if (Autopilot && CarIsGrounded) //Turning control is here; Gas control is at CarController
             {
                 Vector3 relativePos = targetpos - transform.position;
                 Quaternion rotation = Quaternion.LookRotation(relativePos, Vector3.up);
-                float turnspeed = 2f;
+                float turnspeed = (TargetDistance/10f) +1f;
                 float turnlerp = Mathf.Lerp(turnspeed, 0.1f, 10f * Time.deltaTime);
                 transform.rotation = Quaternion.Lerp(transform.rotation, rotation, Time.deltaTime * turnlerp);
 
-                if (TargetDistance < 2f)
-                {
-                    //nextTarget++;
-                }
-            }
+            }*/
+        
         }
-        else
-        {
-            nextTarget = 0;
-        }
-
-
     }
 
 
     void OnCollisionEnter(Collision other)
     {
-        if (other.gameObject.tag == "ground")
-        {
-            PlayerController.GetComponent<CarController>().GetFrictionValues(-1);
-        }
-        /*
-        else if (other.gameObject.tag == "ai")
-        {
-            PlayerController.GetComponent<CarController>().IsBraking = true;
-        }
-        */
+
+
 
     }
 
@@ -81,15 +68,19 @@ public class CarGroundControl : MonoBehaviour
         {
             CarIsGrounded = true;
             MainCamera.GetComponent<CameraController>().ChangeCameraSettings(1); //Car is grounded -> script
-            PlayerController.GetComponent<CarController>().GetFrictionValues(1);
         }
-        else if (other.tag == "ai")
-        {
-            PlayerController.GetComponent<CarController>().GetFrictionValues(2);//Enemy
-        }
-
-
     }
+    void OnTriggerStay(Collider other)
+    {
+        if (other.tag == "ground")
+        {
+            CarIsGrounded = true;
+            MainCamera.GetComponent<CameraController>().ChangeCameraSettings(1); //Car is grounded -> script
+        }
+    }
+
+
+
     void OnTriggerExit(Collider other)
     {
         
@@ -99,39 +90,37 @@ public class CarGroundControl : MonoBehaviour
 
             MainCamera.GetComponent<CameraController>().ChangeCameraSettings(2); //Car is not grounded -> script
         }
-        if (!targetTriggerBug)
+        if (targetTriggerBug==2)
         {
-            targetTriggerBug = true;
-            if (other.gameObject.layer != 7)// not GOAL OBJECT
-            {
-
-                if (other.tag == "slowtarget" || other.tag == "normaltarget" || other.tag == "fasttarget")
+            targetTriggerBug = 0;
+                if (other.gameObject.layer != 7)// not GOAL OBJECT
                 {
-                    if (!Autopilot)
+
+                    if (other.tag == "slowtarget" || other.tag == "normaltarget" || other.tag == "fasttarget")
                     {
-                        //TargetsCache.Add(other.gameObject);
-                        nextTarget++;
-                        nextTarget = TargetController.GetComponent<TargetControl>().PlayerTargetList(other.gameObject, false);
-                    }
-                    else
-                        nextTarget++;
 
+                        nextTarget = TargetController.GetComponent<TargetControl>().PlayerTargetList(other.gameObject, false);
+                    
+
+                    }
+                    /*
+                    else if (other.tag == "autopilotroute" && Autopilot)
+                    {
+                        //nextTarget++;
+                        nextTarget = TargetController.GetComponent<TargetControl>().PlayerTargetList(other.gameObject, false);
+                    }*/
                 }
-                else if(other.tag == "autopilotroute" && Autopilot)
+                else if (other.gameObject.layer == 7)// GOAL OBJECT
                 {
-                    nextTarget++;
-                    //nextTarget = TargetController.GetComponent<TargetControl>().PlayerTargetList(other.gameObject, false);
+                    
+                    TargetController.GetComponent<TargetControl>().PlayerTargetList(other.gameObject, true);
+                    //TargetsCache.Clear();
+                    nextTarget = 0;
                 }
-            }
-            else if (other.gameObject.layer == 7)// GOAL OBJECT
-            {
-                TargetController.GetComponent<TargetControl>().PlayerTargetList(other.gameObject, true);
-                //TargetsCache.Clear();
-                nextTarget = 0;
-            }
+            
         }
         else
-            targetTriggerBug = false;
+            targetTriggerBug++;
     }
 
 

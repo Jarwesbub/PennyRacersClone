@@ -6,7 +6,7 @@ using TMPro;
 public class LapControl : MonoBehaviour
 {
     public DataManager dataManager;
-    public GameObject PlayerController, PlayerCar, AICars;
+    private GameObject PlayerController, PlayerCar, AICars, MainCamera;
     public GameObject UIGameplay, UIHighscores;
     public TMP_Text LapsTxt/*, PosTxt*/;
     public int MaxLaps;
@@ -14,6 +14,8 @@ public class LapControl : MonoBehaviour
     GameObject AIController;
     public List<string> LapTimes;
     public List<string> Leaderboard;
+    [SerializeField]
+    public int leaderboardMaxLength;
     public TMP_Text playtime,leaderboards, laptimes;
     public float CurrentTime;
     public string PlayerName;
@@ -23,18 +25,19 @@ public class LapControl : MonoBehaviour
     // Start is called before the first frame update
     void Awake()
     {
-        if (PlayerController == null)
-            PlayerController = GameObject.FindWithTag("PlayerController");
-        if (PlayerCar == null)
-            PlayerCar = GameObject.FindWithTag("Player");
-        if (AICars == null)
-            AICars = GameObject.FindWithTag("AICars");
-        if (UIGameplay == null)
-            UIGameplay = GameObject.FindWithTag("UIGameplay");
-        if (UIHighscores == null)
+        PlayerController = GameObject.FindWithTag("PlayerController");
+        PlayerCar = GameObject.FindWithTag("Player");
+        AICars = GameObject.FindWithTag("AICars");
+        UIGameplay = GameObject.FindWithTag("UIGameplay");
+        MainCamera = GameObject.FindWithTag("MainCamera");
+        AIController = GameObject.FindWithTag("aicontroller");
+
+        if(UIHighscores==null)
             UIHighscores = GameObject.FindWithTag("UIHighscores");
 
         UIHighscores.SetActive(false);
+        int player = 1;
+        leaderboardMaxLength = AICars.transform.childCount + player;
 
         DrawLaps(1);
         dataManager.Load();
@@ -44,12 +47,13 @@ public class LapControl : MonoBehaviour
     }
     void Update()
     {
-        if(GameStart)
+
+        if (GameStart)
         {
             CurrentTime += Time.deltaTime;
             SkipFrames++;
 
-            if (SkipFrames > 50)
+            if (SkipFrames > 10)
             {
                 SkipFrames = 0;
                 ShowTime();
@@ -107,57 +111,65 @@ public class LapControl : MonoBehaviour
 
     public void FinishedPlayers(int number, string name) //-1 = player
     {
-        //Calculate times
-        //int minutes = 0;
-        float curtime = Mathf.Round(CurrentTime * 100f) / 100f;
-
-        string calculatedTime = ConvertTime(curtime);
-        LapTimes.Add(calculatedTime);
-
-        //Calculate car positions in leaderboard
-
-        string pos = (1+Leaderboard.Count).ToString();
-        string space = "  ";
-        if(1+Leaderboard.Count >= 10)
+        if (LapTimes.Count < leaderboardMaxLength)
         {
-            space = " ";
-        }
-
-        if (name == "player")
-        {
-            //Names.Add(PlayerName);
-            name = PlayerName.ToString();
-            Leaderboard.Add(pos + space + name);
-            PlayerController.GetComponent<CarController>().Autopilot = true;
-            PlayerCar.GetComponent<CarGroundControl>().Autopilot = true;
-            StartCoroutine(WaitHighscores());
-        }
-        else
-        {
-            //Names.Add(name);
-            Leaderboard.Add(pos + space + name);
-            GameObject ai = AICars.gameObject.transform.GetChild(number).gameObject;
-            ai.GetComponent<AIGroundControl>().RaceIsOver = true;
-        }
-        //Add leaderboard results in loop command
-        string result = "";
-        foreach (var listMember in Leaderboard)
-        {
-            result += listMember.ToString() + "\n";
-        }
-        leaderboards.text = result;
-
-        //Add all laptimes to single string "alltimes" in loop command
-        string allTimes = "";
-        foreach (var listMember in LapTimes)
-        {
-            //string mins = minutes.ToString();
-            //times += listMember.ToString() + "\n";
-            allTimes += string.Format("{0:F2}", listMember).ToString()+"\n";
             
+
+            //Calculate times
+            //int minutes = 0;
+            float curtime = Mathf.Round(CurrentTime * 100f) / 100f;
+
+            string calculatedTime = ConvertTime(curtime);
+            LapTimes.Add(calculatedTime);
+
+            //Calculate car positions in leaderboard
+
+            string pos = (1 + Leaderboard.Count).ToString();
+            string space = "  ";
+            if (1 + Leaderboard.Count >= 10)
+            {
+                space = " ";
+            }
+
+            if (name == "player")
+            {
+                //Names.Add(PlayerName);
+                name = PlayerName.ToString();
+                Leaderboard.Add(pos + space + name);
+                //PLAYER AUTOPILOT ON!
+                AIController.GetComponent<AIController>().PlayerAutopilot();
+                PlayerCar.GetComponent<CarGroundControl>().Autopilot = true;
+                PlayerController.SetActive(false); //Multiple leaderboards if true
+                StartCoroutine(WaitHighscores());
+            }
+            else
+            {
+                //Names.Add(name);
+                Leaderboard.Add(pos + space + name);
+                GameObject ai = AICars.gameObject.transform.GetChild(number).gameObject;
+                ai.GetComponent<AIGroundControl>().RaceIsOver = true;
+            }
+            //Add leaderboard results in loop command
+            string result = "";
+            foreach (var listMember in Leaderboard)
+            {
+                result += listMember.ToString() + "\n";
+            }
+            leaderboards.text = result;
+
+            //Add all laptimes to single string "alltimes" in loop command
+            string allTimes = "";
+            foreach (var listMember in LapTimes)
+            {
+                //string mins = minutes.ToString();
+                //times += listMember.ToString() + "\n";
+                allTimes += string.Format("{0:F2}", listMember).ToString() + "\n";
+
+            }
+            laptimes.text = allTimes;
         }
-        laptimes.text = allTimes;
     }
+
 
     IEnumerator WaitHighscores()
     {
