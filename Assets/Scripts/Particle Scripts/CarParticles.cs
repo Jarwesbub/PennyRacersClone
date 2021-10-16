@@ -4,9 +4,13 @@ using UnityEngine;
 
 public class CarParticles : MonoBehaviour
 {
-    private GameObject PlayerController;
-    public ParticleSystem left_drift, right_drift;
+    private GameObject Player,PlayerController;
+    public GameObject L_wheel, R_wheel;
+    private ParticleSystem left_drift, right_drift;
+    public int RoadType;
     public bool IsDrifting, IsGrounded;
+    public Color grey, brown;
+    private int currentColor;
 
     // Start is called before the first frame update
     void Awake()
@@ -14,30 +18,88 @@ public class CarParticles : MonoBehaviour
         IsDrifting = false;
         IsGrounded = false;
         PlayerController = GameObject.FindWithTag("PlayerController");
+        Player = GameObject.FindWithTag("Player");
+        left_drift = L_wheel.GetComponent<ParticleSystem>();
+        right_drift = R_wheel.GetComponent<ParticleSystem>();
+
+
     }
 
     // Update is called once per frame
     void Update()
     {
         IsDrifting = PlayerController.GetComponent<CarController>().IsDrifting;
-        IsGrounded = PlayerController.GetComponent<CarController>().IsGrounded;
+        //IsGrounded = PlayerController.GetComponent<CarController>().IsGrounded;
+        RoadType = Player.GetComponent<CarGroundControl>().RoadType;
 
-        if (IsDrifting && IsGrounded)
+        if (IsDrifting && RoadType == 1)//Asphalt
         {
             float playerinput = PlayerController.GetComponent<CarController>().verticalInput;
             bool IsBraking = PlayerController.GetComponent<CarController>().IsBraking;
             float scale = 0.8f;
             if (playerinput >= scale || playerinput <= -scale || IsBraking)
             {
-                left_drift.Play();
-                right_drift.Play();
+                AsphaltDriftPlay(true);
             }
         }
-        else if (!IsGrounded)
+        else if (IsDrifting && RoadType == 2)//Grass
+        {
+            float playerinput = PlayerController.GetComponent<CarController>().verticalInput;
+            bool IsBraking = PlayerController.GetComponent<CarController>().IsBraking;
+            float scale = 0.8f;
+            if (playerinput >= scale || playerinput <= -scale || IsBraking)
+            {
+                DirtDriftPlay(true);
+            }
+        }
+        else if (RoadType==0)
+        {
+            AsphaltDriftPlay(false);
+            DirtDriftPlay(false);
+        }
+
+    }
+    private void AsphaltDriftPlay(bool play)
+    {
+        if(play)
+        {
+            if(currentColor != 1)
+            {
+                L_wheel.GetComponent<Renderer>().material.color = grey;
+                R_wheel.GetComponent<Renderer>().material.color = grey;
+                currentColor = 1;
+            }
+
+            left_drift.Play();
+            right_drift.Play();
+        }
+        else
         {
             left_drift.Stop();
             right_drift.Stop();
         }
 
     }
+    private void DirtDriftPlay(bool play)
+    {
+        if (play)
+        {
+            if (currentColor != 2)
+            {
+                L_wheel.GetComponent<Renderer>().material.color = brown;
+                R_wheel.GetComponent<Renderer>().material.color = brown;
+                currentColor = 2;
+            }
+
+            left_drift.Play();
+            right_drift.Play();
+        }
+        else
+        {
+            left_drift.Stop();
+            right_drift.Stop();
+        }
+
+    }
+
 }

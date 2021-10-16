@@ -3245,6 +3245,7 @@ MonoBehaviour:
   Laps: 1
   LapTimes: []
   Leaderboard: []
+  leaderboardMaxLength: 0
   playtime: {fileID: 1126237781}
   leaderboards: {fileID: 254532692}
   laptimes: {fileID: 669083895}
@@ -7715,10 +7716,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1bbf7a792dc9f6841914af82803f3a1f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  left_drift: {fileID: 1497296186}
-  right_drift: {fileID: 1180272471}
+  L_wheel: {fileID: 1256893596}
+  R_wheel: {fileID: 1057593782}
+  RoadType: 0
   IsDrifting: 0
   IsGrounded: 0
+  grey: {r: 0.6981132, g: 0.6981132, b: 0.6981132, a: 0.627451}
+  brown: {r: 0.5471698, g: 0.19677883, b: 0, a: 0.70980394}
 --- !u!4 &944806534 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7554811550642438320, guid: 0a73ae2d42c187e428355e6d74b4de93, type: 3}
@@ -8678,6 +8682,11 @@ PrefabInstance:
 Transform:
   m_CorrespondingSourceObject: {fileID: 7554811550642438320, guid: 0a73ae2d42c187e428355e6d74b4de93, type: 3}
   m_PrefabInstance: {fileID: 1830735294}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &1057593782 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6337832147165349759, guid: 861785d304e715c458a9e7ea892753a2, type: 3}
+  m_PrefabInstance: {fileID: 1313717780193959595}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &1059616730
 GameObject:
@@ -9682,11 +9691,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 188141800930018982, guid: a3ee36c89b753424ba4a74b29d1aa64b, type: 3}
   m_PrefabInstance: {fileID: 1176048941}
   m_PrefabAsset: {fileID: 0}
---- !u!198 &1180272471 stripped
-ParticleSystem:
-  m_CorrespondingSourceObject: {fileID: 6337832147165349746, guid: 861785d304e715c458a9e7ea892753a2, type: 3}
-  m_PrefabInstance: {fileID: 1313717780193959595}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1183888521
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -9917,6 +9921,11 @@ Transform:
 --- !u!1 &1240915497 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1313717779234652290, guid: 861785d304e715c458a9e7ea892753a2, type: 3}
+  m_PrefabInstance: {fileID: 1313717780193959595}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &1256893596 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1313717778970948508, guid: 861785d304e715c458a9e7ea892753a2, type: 3}
   m_PrefabInstance: {fileID: 1313717780193959595}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &1261147235
@@ -11755,11 +11764,6 @@ PrefabInstance:
 Transform:
   m_CorrespondingSourceObject: {fileID: 188141800930018982, guid: a3ee36c89b753424ba4a74b29d1aa64b, type: 3}
   m_PrefabInstance: {fileID: 1477490935}
-  m_PrefabAsset: {fileID: 0}
---- !u!198 &1497296186 stripped
-ParticleSystem:
-  m_CorrespondingSourceObject: {fileID: 1313717778970948497, guid: 861785d304e715c458a9e7ea892753a2, type: 3}
-  m_PrefabInstance: {fileID: 1313717780193959595}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1499264931
 PrefabInstance:
@@ -14388,9 +14392,9 @@ GameObject:
   - component: {fileID: 1993058531}
   - component: {fileID: 1993058530}
   - component: {fileID: 1993058529}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Terrain
-  m_TagString: ground
+  m_TagString: Asphalt
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 4294967294

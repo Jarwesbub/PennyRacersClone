@@ -12,10 +12,16 @@ public class CarGroundControl : MonoBehaviour
     public int nextTarget, targetCount;
     public float TargetDistance;
     public bool CarIsGrounded, Autopilot;
-    private int targetTriggerBug = 2;
+    public int RoadType;
 
+    //Possible BUGS in future:
+    private int targetTriggerBug = 2;//Avoids multiple trigger actions when collision with targets
+    [SerializeField]
+    private int groundTriggerCount; //Works when ROAD and TERRAIN layered object are close to each other
+    //
     void Awake()
     {
+        RoadType = 0;
         Autopilot = false;
         nextTarget = 0;
         TargetController = GameObject.FindWithTag("TargetController");
@@ -39,57 +45,83 @@ public class CarGroundControl : MonoBehaviour
         {
             Vector3 targetpos = targetPosList[nextTarget];
             TargetDistance = Vector3.Distance(transform.position, targetpos);
-
-            /*
-            if (Autopilot && CarIsGrounded) //Turning control is here; Gas control is at CarController
-            {
-                Vector3 relativePos = targetpos - transform.position;
-                Quaternion rotation = Quaternion.LookRotation(relativePos, Vector3.up);
-                float turnspeed = (TargetDistance/10f) +1f;
-                float turnlerp = Mathf.Lerp(turnspeed, 0.1f, 10f * Time.deltaTime);
-                transform.rotation = Quaternion.Lerp(transform.rotation, rotation, Time.deltaTime * turnlerp);
-
-            }*/
         
         }
     }
-
-
-    void OnCollisionEnter(Collision other)
-    {
-
-
-
-    }
-
+    
     void OnTriggerEnter(Collider other)
     {
         if (other.tag == "ground")
         {
+            RoadType = 0;
             CarIsGrounded = true;
             MainCamera.GetComponent<CameraController>().ChangeCameraSettings(1); //Car is grounded -> script
+        }
+        else if(other.gameObject.layer == 8 || other.gameObject.layer == 9) //ROAD or TERRAIN
+        {
+            groundTriggerCount++;
+            CheckGroundType(other);
         }
     }
     void OnTriggerStay(Collider other)
     {
-        if (other.tag == "ground")
+        if(other.tag == "Asphalt" || other.tag == "Grass" || other.tag == "ground")
         {
             CarIsGrounded = true;
-            MainCamera.GetComponent<CameraController>().ChangeCameraSettings(1); //Car is grounded -> script
+        }
+        if(RoadType == 0)
+        {
+            CheckGroundType(other);
         }
     }
-
-
+    void CheckGroundType(Collider other)
+    {
+        
+        {
+            
+            if (other.tag == "Asphalt")
+            {
+                RoadType = 1;
+                CarIsGrounded = true;
+                MainCamera.GetComponent<CameraController>().ChangeCameraSettings(1); //Car is grounded -> script
+            }
+            if (other.tag == "Grass")
+            {
+                RoadType = 2;
+                CarIsGrounded = true;
+                MainCamera.GetComponent<CameraController>().ChangeCameraSettings(1); //Car is grounded -> script
+            }
+        }
+    }
 
     void OnTriggerExit(Collider other)
     {
         
         if (other.tag == "ground")
         {
-            CarIsGrounded = false;
-
+            RoadType = 0;
+            groundTriggerCount--;
+            if (groundTriggerCount <= 0)
+                CarIsGrounded = false;
+           MainCamera.GetComponent<CameraController>().ChangeCameraSettings(2); //Car is not grounded -> script
+        }
+        else if (other.tag == "Asphalt")
+        {
+            RoadType = 0;
+            groundTriggerCount--;
+            if (groundTriggerCount <= 0)
+                CarIsGrounded = false;
             MainCamera.GetComponent<CameraController>().ChangeCameraSettings(2); //Car is not grounded -> script
         }
+        else if (other.tag == "Grass")
+        {
+            RoadType = 0;
+            groundTriggerCount--;
+            if (groundTriggerCount <= 0)
+                CarIsGrounded = false;
+            MainCamera.GetComponent<CameraController>().ChangeCameraSettings(2); //Car is not grounded -> script
+        }
+
         if (targetTriggerBug==2)
         {
             targetTriggerBug = 0;
