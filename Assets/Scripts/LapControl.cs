@@ -25,6 +25,9 @@ public class LapControl : MonoBehaviour
     // Start is called before the first frame update
     void Awake()
     {
+        if (dataManager == null)
+            dataManager = GameObject.FindWithTag("DataManager").GetComponent<DataManager>();
+
         PlayerController = GameObject.FindWithTag("PlayerController");
         PlayerCar = GameObject.FindWithTag("Player");
         AICars = GameObject.FindWithTag("AICars");
@@ -39,10 +42,11 @@ public class LapControl : MonoBehaviour
         int player = 1;
         leaderboardMaxLength = AICars.transform.childCount + player;
 
-        DrawLaps(1);
         dataManager.Load();
         PlayerName = dataManager.data.name;
+        MaxLaps = dataManager.data.MaxLaps;
 
+        DrawLaps(1);
         //CurrentTime = 200f; //TESTING DELETE!!!!!!!!!!!!!!!!!
     }
     void Update()
@@ -111,7 +115,7 @@ public class LapControl : MonoBehaviour
 
     public void FinishedPlayers(int number, string name) //-1 = player
     {
-        if (LapTimes.Count < leaderboardMaxLength)
+        if (LapTimes.Count < leaderboardMaxLength && (name != "NotAItoday")) //Not a player who is using AIgroundControl-script!
         {
             
 
@@ -137,8 +141,8 @@ public class LapControl : MonoBehaviour
                 name = PlayerName.ToString();
                 Leaderboard.Add(pos + space + name);
                 //PLAYER AUTOPILOT ON!
-                AIController.GetComponent<AIController>().PlayerAutopilot();
-                PlayerCar.GetComponent<CarGroundControl>().Autopilot = true;
+                AIController.GetComponent<AIController>().StartPlayerAutopilot();
+                //PlayerCar.GetComponent<CarGroundControl>().Autopilot = true;
                 PlayerController.SetActive(false); //Multiple leaderboards if true
                 StartCoroutine(WaitHighscores());
             }

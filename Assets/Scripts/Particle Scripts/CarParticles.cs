@@ -9,8 +9,10 @@ public class CarParticles : MonoBehaviour
     private ParticleSystem left_drift, right_drift;
     public int RoadType;
     public bool IsDrifting, IsGrounded;
+    public bool UIjoystickActive = false;
     public Color grey, brown;
     private int currentColor;
+    public float TEST;
 
     // Start is called before the first frame update
     void Awake()
@@ -22,7 +24,7 @@ public class CarParticles : MonoBehaviour
         left_drift = L_wheel.GetComponent<ParticleSystem>();
         right_drift = R_wheel.GetComponent<ParticleSystem>();
 
-
+        UIjoystickActive = PlayerController.GetComponent<CarController>().useUIjoystick;
     }
 
     // Update is called once per frame
@@ -32,11 +34,19 @@ public class CarParticles : MonoBehaviour
         //IsGrounded = PlayerController.GetComponent<CarController>().IsGrounded;
         RoadType = Player.GetComponent<CarGroundControl>().RoadType;
 
+        InputChecks();
+
+
+    }
+    private void InputChecks()
+    {
+        float scale = 0.8f; //How easily effects are played when turning
+        scale = 0f; //TESTING
+
         if (IsDrifting && RoadType == 1)//Asphalt
         {
             float playerinput = PlayerController.GetComponent<CarController>().verticalInput;
             bool IsBraking = PlayerController.GetComponent<CarController>().IsBraking;
-            float scale = 0.8f;
             if (playerinput >= scale || playerinput <= -scale || IsBraking)
             {
                 AsphaltDriftPlay(true);
@@ -46,19 +56,20 @@ public class CarParticles : MonoBehaviour
         {
             float playerinput = PlayerController.GetComponent<CarController>().verticalInput;
             bool IsBraking = PlayerController.GetComponent<CarController>().IsBraking;
-            float scale = 0.8f;
             if (playerinput >= scale || playerinput <= -scale || IsBraking)
             {
                 DirtDriftPlay(true);
             }
         }
-        else if (RoadType==0)
+        else if (RoadType == 0)
         {
             AsphaltDriftPlay(false);
             DirtDriftPlay(false);
         }
 
+
     }
+
     private void AsphaltDriftPlay(bool play)
     {
         if(play)

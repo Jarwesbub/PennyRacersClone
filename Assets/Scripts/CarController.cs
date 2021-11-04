@@ -6,7 +6,7 @@ using TMPro;
 public class CarController : MonoBehaviour
 {
     public GameObject Car;
-    public GameObject PlayerData;
+    //public GameObject PlayerData;
     private GameObject GameController, AIController;
     public TMP_Text SpeedTxt;
 
@@ -16,14 +16,15 @@ public class CarController : MonoBehaviour
 
     //MOBILE
     public FixedJoystick joystick;
-    public bool useUIjoystick = false;
-
+    public bool useUIjoystick = false, UIbuttonPedals = false;
+    //public float MobileTurningBuff;
+    public int UIbuttonVertical; //1=gas, -1=brake; //This is vertical input on buttons "gas pedal and brake pedal"
     //slide power speed nerf
-    public float TEST; //DELETE WHEN NOT IN TEST USE!
+    public float TEST, TEST2; //DELETE WHEN NOT IN TEST USE!
     public float Steps, driftWaitSteps; //How many steps/fixed frames
 
     //Non changeable values (so far) horizDP and verNP are rigidbody force -values that gives better drifting experience
-    public float MinimumDriftValue;
+    //public float MinimumDriftValue;
 
     //Accessable values from other scripts: (can be changed anytime) all public floats
     public float Speed, EnginePower, Acceleration, MaxSpeed, Brake, Grip;
@@ -31,7 +32,7 @@ public class CarController : MonoBehaviour
     public float DynFriction, StatFriction; //These are Car's current stats for rb physics material //Dynamic- and Static Friction
 
     [SerializeField] //FOR DEBUGGING
-    private float SpeedLimiter, CarMass, CurrentAcceleration, DriftVal, DriftAccBuff, PosZ; //CurAcc/DriftCalc = show FixedUpdate values; PosZ = where Car is facing before spawning
+    private float SpeedLimiter, CarMass, CurrentAcceleration, DriftVal, DriftAccBuff, rbDriftBuff; //CurAcc/DriftCalc = show FixedUpdate values; PosZ = where Car is facing before spawning
 
     private float AddSpeed, ReverseSpeed, ReverseMaxSpeed, DriftValToAxis, CurrRotation; //AddSpeed must be 750f!
     Vector3 oldPosition; //Spawning
@@ -40,10 +41,11 @@ public class CarController : MonoBehaviour
 
     //[SerializeField] //FOR DEBUGGING
     private bool IsReverse = false;
-    public bool GameStart = false, IsDrifting = false, IsAcc = false, IsBraking = false, IsGrounded, IsHitting = false, IsOnGrass = false, Autopilot = false;
+    public bool GameStart = false, IsDrifting = false, IsAcc = false, IsBraking = false, IsGrounded, IsHitting = false, IsOnGrass = false;
+    public bool ResetPlayer = false, Autopilot = false;
     private bool CooldownWait = false, ClutchWait = false;
 
-    public float horizontalInput, verticalInput; //Turning values from axis (between values of -1 to 1)
+    public float horizontalInput, verticalInput, prevHorizontalInput; //Turning values from axis (between values of -1 to 1)
     private bool horizontalInputIsNegative;
 
     void Awake()
@@ -53,12 +55,15 @@ public class CarController : MonoBehaviour
         if (useUIjoystick)
         {
             joystick = GameObject.FindWithTag("Joystick").GetComponent<FixedJoystick>();
+            //Turning += MobileTurningBuff;
         }
+        rbDriftBuff = 0f;
         Autopilot = false;
         Speed = 0f;
         SpeedLimiter = 1f;
         AddSpeed = 750f; //MUST BE 750f for this build
         ReverseMaxSpeed = 50f;
+        DriftVal = 0.1f;/////Mobile bug??
 
         IsBraking = false;
         IsAcc = false;
@@ -72,44 +77,81 @@ public class CarController : MonoBehaviour
 
         //HoldTurningValue = Turning;
     }
-
-    void DriftController()
+    void Start()
     {
+        if (!useUIjoystick) //Keyboard turning buff
+            Turning *= 1.5f;
 
-        if (IsReverse == false && IsGrounded == true && Speed > 30f / 2f && IsHitting == false)
+    }
+    void DriftController(bool IsNotKeyboard)
+    {
+        rbDriftBuff = 0f;
+        float input = horizontalInput;
+        float driftStartLimit = 0.0f;//Works better with keyboard (buttons)
+        if (useUIjoystick)
+            driftStartLimit = 0.6f; //Works better with joystick (axis)
+        
+        if ((input > driftStartLimit || input < -driftStartLimit)/* || !IsNotKeyboard*/) // or if keyboard is active
         {
-            float input = horizontalInput;
-            float maxDriftVal = 4f;//5f normal
+            if (!IsReverse && IsGrounded && Speed > 30f / 2f && !IsHitting)
+            {
+                float maxDriftVal = 4f;//5f normal
+                float turn = Turning;
 
-            if(IsAcc)
-                input *= 4f;
-            //input = Mathf.Lerp(0f, input, 100f * Time.deltaTime);
-            float turn = Turning;
-
-                if (horizontalInputIsNegative == true)
+                if (horizontalInputIsNegative)
                     turn -= Turning * 2; //-- makes value negative
 
-
-                if (horizontalInputIsNegative == true && input < 0f || horizontalInputIsNegative == false && input > 0f)
+                if (IsNotKeyboard) //UIJoystick
                 {
-                    DriftVal += input * (Speed / 10000f) * turn; //5000f
-
-                //Mathf.Lerp(0f, DriftVal, TEST * Time.deltaTime);
-                    DriftAccBuff = 1f;
-
-                    if (IsBraking == true)
+                    
+                    if (IsAcc)
                     {
-                        DriftVal *= 1.05f;
-                        DriftAccBuff = 1f;
+                        input *= 4f;//4f
                     }
-
-                    if (IsAcc == true)
+                    float scale = 0.6f;
+                    if (horizontalInputIsNegative && input < -scale || !horizontalInputIsNegative && input > scale)
                     {
-                        DriftAccBuff *= (0.005f / Grip); //perfect so far!
-                        DriftVal += DriftAccBuff;
-                    }   
+                        DriftVal += input * (Speed / 10000f) * turn; //5000f
+                        DriftAccBuff = 1f;
 
+                        if (IsBraking)
+                        {
+                            DriftVal *= 1.05f;
+                            DriftAccBuff = 1f;
+                        }
+                        if (IsAcc)
+                        {
+                            DriftAccBuff *= (0.01f / Grip); //(0.005f / Grip)perfect so far!
+                            DriftVal += DriftAccBuff;
+                        }
+                    }
+                    else
+                        IsDrifting = false;
 
+                }
+                else if (!IsNotKeyboard)//KEYBOARD
+                {
+                    if (IsAcc)
+                    {
+                        input *= 4f;
+                    }
+                    float scale = 0.0f;
+                    if (horizontalInputIsNegative && input < -scale || !horizontalInputIsNegative && input > scale)
+                    {
+                        DriftVal += input * (Speed / 10000f) * turn; //5000f
+                        DriftAccBuff = 2f;
+
+                        if (IsBraking)
+                        {
+                            DriftVal *= 1.05f;
+                            DriftAccBuff = 4f;
+                        }
+                        if (IsAcc)
+                        {
+                            DriftAccBuff *= (0.01f / Grip); //(0.005f / Grip)perfect so far!
+                            DriftVal += DriftAccBuff;
+                        }
+                    }
                 }
 
                 if (DriftVal > maxDriftVal)
@@ -120,30 +162,35 @@ public class CarController : MonoBehaviour
                 {
                     DriftVal = -maxDriftVal;
                 }
-            
-                float GripControl = Grip;
-                
 
+                float GripControl = Grip;
+
+                //Final check for IsDrifting!
                 if (GripControl < DriftVal || -GripControl > DriftVal)
                 {
-                /*
-                    float SlidePower = -300f;//-300f How much drifting gives horizontal power
-                    float SpeedNerf = -100f;//-100f Balances SlidePower
-                float horizontaldriftpower = -180f;
-                float verticaldriftpower = -20f;
+                    //float rbBuff = (0.25f*Speed) *(-turn * 3f); //2f
+                    float rbBuff = (40f+(Speed * 0.1f)) * (-turn * 3f); //2f 
+                    if (IsBraking)
+                        rbBuff *= 2f;
 
-                    SlidePower = horizontaldriftpower; //-72f -100
-                    SpeedNerf = EnginePower * verticaldriftpower; //-24f -20
-
-                    //rb.AddRelativeForce(new Vector3(input * Mathf.Lerp(0, SlidePower, 1f * Time.deltaTime), -1f * Time.deltaTime, SpeedNerf * Time.deltaTime));
-                */
+                    rbDriftBuff = rbBuff;
                     IsDrifting = true;
-
                     DriftValToAxis = DriftVal;
-                }
 
+                }
+                else //Grip higher than DriftVal
+                {
+                    IsDrifting = false;
+                }
+            }
+            else //Not grounded || too slow speed
+            {
+                DriftVal = 0f;
+                DriftAccBuff = 0f;
+                IsDrifting = false;
+            }
         }
-        else
+        else if (useUIjoystick)//Input is too low (when turning)
         {
             IsDrifting = false;
             
@@ -156,8 +203,10 @@ public class CarController : MonoBehaviour
     void FixedUpdate()
     {
         Steps += Time.deltaTime;
+        float cargravity = 100f;
+        rb.AddRelativeForce(Vector3.down * Time.deltaTime * cargravity);
 
-        if (GameStart)
+        if (GameStart && !ResetPlayer)
         {
             if (!Autopilot)
             {
@@ -165,13 +214,19 @@ public class CarController : MonoBehaviour
                 {
                     if (!useUIjoystick)
                     {
+                        
                         horizontalInput = Input.GetAxis("Horizontal");
                         verticalInput = Input.GetAxis("Vertical");
+
                     }
-                    else
+                    else //UI JOYSTICK
                     {
-                        horizontalInput = joystick.Horizontal;
-                        verticalInput = joystick.Vertical;
+                        horizontalInput = joystick.Horizontal; //TURNING
+
+                        if (UIbuttonPedals) //USE GAS/BRAKE PEDALS
+                            verticalInput = UIbuttonVertical;
+                        else // JOYSTICK GAS/THROTTLE
+                            verticalInput = joystick.Vertical;
 
                     }
                 }
@@ -207,7 +262,8 @@ public class CarController : MonoBehaviour
 
                     IsGrounded = true;
 
-                    DriftController();
+                    DriftController(useUIjoystick);
+                    //DriftController(false);
                     CarAllTurningInputs(DriftValToAxis);
 
 
@@ -220,7 +276,7 @@ public class CarController : MonoBehaviour
                 {
                     IsGrounded = false;
 
-                    if (Speed < 0.5 && CooldownWait == false)
+                    if (Speed < 30f && CooldownWait == false)
                     {
                         CooldownWait = true;
                         StartCoroutine(ReSpawnCooldownWait());
@@ -228,7 +284,7 @@ public class CarController : MonoBehaviour
                 }
 
 
-                if (IsAcc == false && IsGrounded == true)
+                if (IsAcc == false && IsGrounded == true && CooldownWait == false)
                 {
                     if (Speed > 1f && LoseSpeed > 0f && IsReverse == false)
                     {
@@ -241,6 +297,9 @@ public class CarController : MonoBehaviour
                     }
 
                 }
+                //Calculate speed based on objects movement speed
+                Speed = Vector3.Distance(oldPosition, Car.transform.position) * 200f * SpeedLimiter; // Original = * 100f
+                oldPosition = Car.transform.position;
             }
             else //Autopilot ON
             {
@@ -248,24 +307,23 @@ public class CarController : MonoBehaviour
 
             }
         }
-        else
+        else if (!GameStart)
         {
             GameStart = GameController.GetComponent<RaceControl>().GameStart;
         }
-
-        Speed = Vector3.Distance(oldPosition, Car.transform.position) * 200f * SpeedLimiter; // Original = * 100f
-
-        oldPosition = Car.transform.position;
-
+        else if (ResetPlayer)
+        {
+            rb.velocity = Vector3.zero;
+            Speed = 0f;
+        }
+        
     }
 
     private void CarAllTurningInputs(float driftvalue)
     {
-
         if (Speed > 0)
         {
-
-            if (Speed > 0.1f && IsGrounded == true)
+            if (Speed > 0.1f && IsGrounded)
             {
 
                 float rotValue = Turning;
@@ -273,24 +331,15 @@ public class CarController : MonoBehaviour
 
                 if (IsBraking == true) //BACKWADS TURNING
                 {
-                    float TurnValue = horizontalInput;
-                    /*
-                    if (IsNegative == true)
-                    {
-                        TurnValue = -TurnValue;
-                    }
-                    */
+                    //float TurnValue = horizontalInput;
                     rotValue = (Turning * BrakeTurn)/* * TurnValue*/;
                 }
 
                 //CONTROLS LEFT TO RIGHT
 
-                //if (horizontalInput < 0.1f && horizontalInput > -0.1f)
                 if (horizontalInput == 0f)
                 {
-                    //driftvalue = 0f;
                     DriftVal = 0f;
-                    
                     DriftValToAxis -= 0.1f;
                     
                     if (DriftValToAxis < 0.5f || !IsGrounded)
@@ -299,61 +348,18 @@ public class CarController : MonoBehaviour
                     IsDrifting = false;
                     rotValue = 0f;
                 }
-               
 
                 if (horizontalInput > 0.01f) //TURN RIGHT
                 {
-                    //rotValue *= horizontalInput; //Turning variable
-                       /*
-                    if (driftvalue < rotValue)
-                    {
-                        driftvalue = +driftvalue;
-                        
-                    }
-                       */
-                    //rotValue = Mathf.Lerp(0f, rotValue, 100f * Time.deltaTime);
 
                     rotValue *= driftvalue+1f;
-                    
-
-                    //horizontalInputIsNegative = false;
 
                 }
                 if (horizontalInput < -0.01f) //TURN LEFT
                 {
-                    //rotValue *= horizontalInput; //Turning variable
-                    /*
-                    if (driftvalue > rotValue)
-                    {
-                        driftvalue = +driftvalue;
-                        
-                    }
-                    */
                     rotValue *= driftvalue+1f;
 
-                    //horizontalInputIsNegative = true;
-
                 }
-                /*
-                if (IsAcc&&IsDrifting)
-                {
-                    if (horizontalInputIsNegative)
-                    {
-                        rotValue -= 0.1f;
-                    }
-                    else
-                    {
-                        rotValue += 0.1f;
-                    }
-
-                }
-                */
-                /*
-                if (horizontalInput != 0f)
-                    Car.transform.Rotate(new Vector3(0f,1f, 0f), rotValue);
-                else if (driftvalue!=0f&&IsDrifting)
-                    Car.transform.Rotate(new Vector3(0f, 1f, 0f), driftvalue);
-                */
 
                 if (IsHitting == false && IsGrounded)
                 {
@@ -364,10 +370,7 @@ public class CarController : MonoBehaviour
 
                 }
 
-                //DriftValToAxis = 0f;
-
             }
-
         }
     }
 
@@ -418,7 +421,7 @@ public class CarController : MonoBehaviour
                 if (IsBraking)
                     CurrentAcceleration *= 0.9f;
 
-                rb.AddRelativeForce(new Vector3(0, -1f, DriftVal + CarMass * CurrentAcceleration * addspeed * Time.deltaTime)); //CarMass = rb.mass*10f
+                rb.AddRelativeForce(new Vector3(rbDriftBuff, -1f, DriftVal + CarMass * CurrentAcceleration * addspeed * Time.deltaTime)); //CarMass = rb.mass*10f
             }
 
         }
@@ -432,7 +435,7 @@ public class CarController : MonoBehaviour
     private void CarGoBackwardsBrakingInputs()
     {
         //if (Input.GetKey("s") || Input.GetKey("down")/* && IsDrifting == false*/) //BREAKING
-        if(verticalInput < -0.4f)
+        if(verticalInput < -0.2f)
         {
 
 
@@ -441,7 +444,7 @@ public class CarController : MonoBehaviour
 
                 IsBraking = true;
 
-                rb.AddRelativeForce(new Vector3(0, -1f, Brake * Time.deltaTime));
+                rb.AddRelativeForce(new Vector3(rbDriftBuff, -1f, Brake * Time.deltaTime));
 
 
 
@@ -462,7 +465,7 @@ public class CarController : MonoBehaviour
                 else
                 {
                     ReverseSpeed = -(150f + (EnginePower * 10f));
-                    rb.AddRelativeForce(new Vector3(0, -1f, SpeedLimiter * CarMass * ReverseSpeed * Time.deltaTime));//CarMass = rb.mass*10f
+                    rb.AddRelativeForce(new Vector3(rbDriftBuff, -1f, SpeedLimiter * CarMass * ReverseSpeed * Time.deltaTime));//CarMass = rb.mass*10f
                 }
             }
 
@@ -482,12 +485,12 @@ public class CarController : MonoBehaviour
             if (IsBraking == false)
             {
                 LoseSpeed -= 1.8f; // How much car loses speed when not accelerating (per fixed frame)
-                rb.AddRelativeForce(new Vector3(0, -1f, SpeedLimiter * CarMass * CurrentAcceleration * LoseSpeed * Time.deltaTime));//CarMass = rb.mass*10f
+                rb.AddRelativeForce(new Vector3(rbDriftBuff, -1f, SpeedLimiter * CarMass * CurrentAcceleration * LoseSpeed * Time.deltaTime));//CarMass = rb.mass*10f
             }
             else
             {
                 LoseSpeed -= Brake*(Brake/5); //
-                rb.AddRelativeForce(new Vector3(0, -1f, SpeedLimiter * CarMass * CurrentAcceleration * LoseSpeed * Time.deltaTime));//CarMass = rb.mass*10f
+                rb.AddRelativeForce(new Vector3(rbDriftBuff, -1f, SpeedLimiter * CarMass * CurrentAcceleration * LoseSpeed * Time.deltaTime));//CarMass = rb.mass*10f
 
             }
 
@@ -496,23 +499,16 @@ public class CarController : MonoBehaviour
         {
             LoseSpeed += 0.8f; // REVERSE
 
-            rb.AddRelativeForce(new Vector3(0, -1f, LoseSpeed * Time.deltaTime));
+            rb.AddRelativeForce(new Vector3(rbDriftBuff, -1f, LoseSpeed * Time.deltaTime));
 
         }
     }
-
-    public void AutopilotON() //When player finishes race -> no more player control -> "watch your car gameplay on the background"
+    /*
+    private void AutopilotON() //When player finishes race -> no more player control -> "watch your car gameplay on the background"
     {
         Autopilot = true;
-        AIController.GetComponent<AIController>().PlayerAutopilot();
-        /*
-        //Turning will be done at CarGroundControl -script (towards next target)
-        if (Speed < MaxSpeed && IsGrounded)
-        {
-            float addspeed = 750f + (Speed * EnginePower);
-            rb.AddRelativeForce(new Vector3(0, -1f, CarMass * 0.6f * addspeed * Time.deltaTime)); //CarMass = rb.mass*10f
-        }*/
-    }
+        AIController.GetComponent<AIController>().StartPlayerAutopilot();
+    }*/
 
     void Update() // UI STUFF
     {
@@ -542,16 +538,13 @@ public class CarController : MonoBehaviour
 
     IEnumerator ReSpawnCooldownWait() //When player cant move -> respawn in given time
     {
-
+        
         yield return new WaitForSeconds(2f);
 
         if (IsGrounded == false)
         {
-            PosZ = Car.transform.rotation.z;
-            Car.transform.rotation = Quaternion.Euler(0, PosZ + 0f, 0); //+90f works too
-
-            Speed = 0f;
-            rb.AddRelativeForce(new Vector3(0f, 0f, 0f));
+            //rb.velocity = Vector3.zero;
+            Car.GetComponent<CarGroundControl>().PlayerRespawn(true);
             IsBraking = true;
         }
 

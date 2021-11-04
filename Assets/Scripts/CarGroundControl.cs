@@ -5,39 +5,37 @@ using UnityEngine;
 public class CarGroundControl : MonoBehaviour
 {
     public GameObject Ground;
-    public GameObject PlayerController;
+    public GameObject PlayerController, PlayerGround;
     public GameObject MainCamera;
     private GameObject TargetController;
     public List<Vector3> targetPosList;
-    public int nextTarget, targetCount;
-    public float TargetDistance;
-    public bool CarIsGrounded, Autopilot;
+    private int nextTarget, targetCount;
+    public bool CarIsGrounded, Autopilot, IsRespawning = false;
     public int RoadType;
 
     //Possible BUGS in future:
-    private int targetTriggerBug = 2;//Avoids multiple trigger actions when collision with targets
+    //private int targetTriggerBug = 2;//Avoids multiple trigger actions when collision with targets
     [SerializeField]
     private int groundTriggerCount; //Works when ROAD and TERRAIN layered object are close to each other
     //
     void Awake()
     {
+        CarIsGrounded = false;
         RoadType = 0;
         Autopilot = false;
         nextTarget = 0;
+        PlayerController = GameObject.FindWithTag("PlayerController");
+        PlayerGround = GameObject.FindWithTag("PlayerGround");
         TargetController = GameObject.FindWithTag("TargetController");
         MainCamera = GameObject.FindWithTag("MainCamera");
-        targetCount = targetPosList.Count;
     }
     public void LoadAllTargets(Vector3 targetpos)//From TargetControl script
     {
         targetPosList.Add(targetpos);
-
+        targetCount = targetPosList.Count - 1;
 
     }
-    void Start()
-    {
-        CarIsGrounded = false; //test
-    }
+    /*
     void Update()
     {
         
@@ -47,8 +45,54 @@ public class CarGroundControl : MonoBehaviour
             TargetDistance = Vector3.Distance(transform.position, targetpos);
         
         }
+    }*/
+    public void PlayerRespawn(bool fromOtherScript) //Accessed from CarController script when TRUE
+    {
+        PlayerGround.GetComponent<CarTargetTrigger>().playerIsRespawing = true;
+        if (!fromOtherScript)
+        {
+            float sec = 2f;
+            StartCoroutine(RespawnCooldown(sec));
+        }
+        else
+        {
+            RespawnPosition();
+        }
+        
     }
-    
+    private void RespawnPosition()
+    {
+        nextTarget = PlayerGround.GetComponent<CarTargetTrigger>().nextTarget;
+        int spawnPos = nextTarget;
+        int lookAt = nextTarget;
+
+        if (lookAt < targetCount)
+        {
+            lookAt++;
+
+        }
+        transform.rotation = Quaternion.Euler(0f, transform.rotation.y, 0f);
+        transform.position = targetPosList[spawnPos];
+        transform.LookAt(targetPosList[lookAt]);
+    }
+
+    IEnumerator RespawnCooldown(float sec)
+    {
+        PlayerController.GetComponent<CarController>().ResetPlayer = true;
+
+        yield return new WaitForSeconds(sec);
+
+        nextTarget = PlayerGround.GetComponent<CarTargetTrigger>().nextTarget;
+        int spawnPos = nextTarget;
+        int lookAt = nextTarget;
+
+        RespawnPosition();
+
+        PlayerController.GetComponent<CarController>().ResetPlayer = false;
+    }
+
+
+
     void OnTriggerEnter(Collider other)
     {
         if (other.tag == "ground")
@@ -61,6 +105,10 @@ public class CarGroundControl : MonoBehaviour
         {
             groundTriggerCount++;
             CheckGroundType(other);
+        }
+        else if (other.tag == "ForceRespawn")
+        {
+            PlayerRespawn(false);
         }
     }
     void OnTriggerStay(Collider other)
@@ -121,7 +169,7 @@ public class CarGroundControl : MonoBehaviour
                 CarIsGrounded = false;
             MainCamera.GetComponent<CameraController>().ChangeCameraSettings(2); //Car is not grounded -> script
         }
-
+        /*
         if (targetTriggerBug==2)
         {
             targetTriggerBug = 0;
@@ -135,12 +183,6 @@ public class CarGroundControl : MonoBehaviour
                     
 
                     }
-                    /*
-                    else if (other.tag == "autopilotroute" && Autopilot)
-                    {
-                        //nextTarget++;
-                        nextTarget = TargetController.GetComponent<TargetControl>().PlayerTargetList(other.gameObject, false);
-                    }*/
                 }
                 else if (other.gameObject.layer == 7)// GOAL OBJECT
                 {
@@ -153,6 +195,7 @@ public class CarGroundControl : MonoBehaviour
         }
         else
             targetTriggerBug++;
+        */
     }
 
 

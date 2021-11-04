@@ -5,15 +5,14 @@ using UnityEngine;
 public class AIGroundControl : MonoBehaviour
 {
     public string AIName;
-    public GameObject GameController;
+    public GameObject GameController, Ground;
     GameObject LapController;
     public float DrunkLevel, TargetDistance;
     public int Lap, nextTarget, allTargets, MaxLaps;
     private int AINumber, AICount, EngineClass;
     [SerializeField] //DEBUGGING
-    private float Mass, TurnSpeed, AISpeed, MaxSpeedHolder, MaxSpeed;
+    private float Mass, TurnSpeed, AISpeed, MaxSpeedHolder, MaxSpeed, LoseSpeed;
     private float AccLerp, AccNerfer, Steps, WaitSteps;
-    private GameObject Ground;
 
     Rigidbody rb;
     private Vector3 oldPosition;
@@ -22,9 +21,9 @@ public class AIGroundControl : MonoBehaviour
     private GameObject AIController;
     //private GameObject Target;
     private static List<Vector3> targetPosList;
-    //[SerializeField]//DEBUGGING
-    private bool IsGrounded;
-    private bool GameStart = false, IsFinished=false;
+    public bool IsGrounded, ForceRespawn;
+    [SerializeField]//DEBUGGING
+    private bool GameStart = false, IsFinished=false, IsAI=true;
     public bool RaceIsOver;
 
     // Start is called before the first frame update
@@ -35,9 +34,10 @@ public class AIGroundControl : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         Mass = rb.mass;
         Mass *=4f; //Original mass was 0.2f
-
+        LoseSpeed = 1f;
         nextTarget = 0;
-        IsGrounded = false;
+        //IsGrounded = false;
+        ForceRespawn = false;
 
         if (AIController == null)
             AIController = GameObject.FindWithTag("aicontroller");
@@ -46,13 +46,29 @@ public class AIGroundControl : MonoBehaviour
             GameController = GameObject.FindWithTag("GameController");
 
         LapController = GameObject.FindWithTag("LapController");
+        /*
         if(gameObject.tag != "Player")
             Ground = this.gameObject.transform.GetChild(AINumber).gameObject;
-        else
-            Ground = GameObject.FindWithTag("PlayerGround");
+        */
         Lap = 1;
-        MaxLaps = LapController.GetComponent<LapControl>().MaxLaps;
+        //MaxLaps = LapController.GetComponent<LapControl>().MaxLaps;
     }
+    void OnEnable()
+    {
+        if(gameObject.tag == "Player")
+        {
+            IsAI = false;
+            Ground = GameObject.FindWithTag("PlayerGround");
+            AIName = "NotAItoday";
+        }
+        else
+        {
+            IsAI = true;
+        }
+
+
+    }
+
 
     public void AIControllerStartUp(int AInumber, int AIcount, int engineclass, float accLerp, float turnspeed, float maxspeed)
     {
@@ -88,11 +104,13 @@ public class AIGroundControl : MonoBehaviour
         AISpeed = Vector3.Distance(oldPosition, gameObject.transform.position) * 200f; // Original = * 100f
         oldPosition = gameObject.transform.position;
 
-
+        float gravityBuff = 500f;
+        rb.AddRelativeForce(Vector3.down * Time.deltaTime * gravityBuff);
 
         if (GameStart)
         {
             //if (IsGrounded)
+            if(!ForceRespawn)
             {
                 float spd = 0f;
                 float maxspeed = MaxSpeed;
@@ -140,8 +158,12 @@ public class AIGroundControl : MonoBehaviour
 
                     float CurrentAcceleration = Mathf.Lerp(0.1f, spd, lerpTime * Time.deltaTime);
 
-                    rb.AddRelativeForce(new Vector3(0, -2f, Mass * CurrentAcceleration));
+                    if (IsGrounded)
+                        LoseSpeed = 1f;
+                    else if(LoseSpeed > 0.0f)
+                        LoseSpeed -= 0.002f;
 
+                    rb.AddRelativeForce(new Vector3(0, -2f, Mass * LoseSpeed * CurrentAcceleration));
 
                 }
                 TargetDistance = Vector3.Distance(transform.position, targetpos);
@@ -165,17 +187,18 @@ public class AIGroundControl : MonoBehaviour
                 }
 
             }
-            if (!IsGrounded) // BUGI PAIKKAAAA!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            if (!IsGrounded || ForceRespawn) // BUGI PAIKKAAAA!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             {
-                if (WaitSteps < Steps)
+                if (AISpeed < 30f)
                 {
-                    WaitSteps = 0f;
+                    StartCoroutine(AIRespawn());
+                    /*
                     float posZ = transform.rotation.z;
                     //transform.rotation = Quaternion.Euler(0, posZ + 0f, 0); //TÄÄLTÄ LÖYTYI KÄÄNTYMIS BUGI
 
                     Vector3 relativePos = targetPosList[nextTarget] + transform.position;
                     Quaternion rotation = Quaternion.LookRotation(relativePos, Vector3.up);
-
+                    */
                 }
 
             }
@@ -195,9 +218,6 @@ public class AIGroundControl : MonoBehaviour
 
         }
     }
-
-
-
     private void targetPosRandomizer(int AInumber)
     {
         float pos = DrunkLevel;
@@ -215,9 +235,40 @@ public class AIGroundControl : MonoBehaviour
 
     }
 
+    IEnumerator AIRespawn()
+    {
+        yield return new WaitForSeconds(2f);
+
+        if(!IsGrounded || ForceRespawn)
+        {
+            int prevtarget = nextTarget - 1;
+            int nexttarget = nextTarget;
+
+            if (nextTarget <= 0)
+            {
+                prevtarget = 0;
+                nexttarget = 1;
+
+            }
+
+            transform.rotation = Quaternion.Euler(0f, transform.rotation.y, 0f);
+            transform.position = targetPosList[prevtarget];
+
+            transform.LookAt(targetPosList[nexttarget]);
+            ForceRespawn = false;
+            IsGrounded = true;
+        }
+
+    }
+
     void OnCollisionEnter(Collision other)
     {
-        if (other.gameObject.tag == "wall")// WALLS
+        if (other.gameObject.tag == "ground" || other.gameObject.tag == "Asphalt" || other.gameObject.tag == "Grass")
+        {
+            IsGrounded = true;
+        }
+        /*
+        else if (other.gameObject.tag == "wall")// WALLS
         {
             float maxspeed = MaxSpeed -= 20f;
             MaxSpeed = maxspeed;
@@ -243,15 +294,21 @@ public class AIGroundControl : MonoBehaviour
             }
 
         }
-
+        */
     }
 
     void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.tag == "ground")
+        if (other.gameObject.tag == "ground" || other.gameObject.tag == "Asphalt" || other.gameObject.tag == "Grass")
         {
             IsGrounded = true;
         }
+        else if (other.gameObject.tag == "ForceRespawn")
+        {
+            ForceRespawn = true;
+
+        }
+        /*
         else if (other.gameObject.tag == "ai")
         {
             string numb = " ";
@@ -272,6 +329,7 @@ public class AIGroundControl : MonoBehaviour
             }
 
         }
+        */
 
         float speednerfer = MaxSpeedHolder / 1000f;
 
@@ -312,15 +370,22 @@ public class AIGroundControl : MonoBehaviour
             }
         }
     }
-
+    /*
     void OnTriggerExit(Collider other)
     {
         
-        if (other.tag == "ground")
+        if (other.gameObject.tag == "ground" || other.gameObject.tag == "Asphalt" || other.gameObject.tag == "Grass")
+        {
+            IsGrounded = true;
+        }
+    }
+    */
+    void OnCollisionExit(Collision other)
+    {
+
+        if (other.gameObject.tag == "ground" || other.gameObject.tag == "Asphalt" || other.gameObject.tag == "Grass")
         {
             IsGrounded = false;
-            WaitSteps = Steps + 4f; //Wait 4 seconds before respawn
         }
-
     }
 }

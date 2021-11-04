@@ -10,7 +10,7 @@ public class PosControl : MonoBehaviour
     public TMP_Text LapsTxt, PosTxt, WrongWayTxt;
     public GameObject AICars;
     public List<GameObject> AI;
-    public GameObject Player, TargetController;
+    public GameObject Player, PlayerGround, TargetController;
     public GameObject NextAI, PrevAI;
     public int playerPos, playerNextTarget, nextAITarget, prevAITarget;
     //public int nextAINumb,prevAINumb;
@@ -30,6 +30,7 @@ public class PosControl : MonoBehaviour
             AICars = GameObject.FindWithTag("AICars");
 
             Player = GameObject.FindWithTag("Player");
+            PlayerGround = GameObject.FindWithTag("PlayerGround");
 
         if (TargetController == null)
             TargetController = GameObject.FindWithTag("TargetController");
@@ -69,8 +70,8 @@ public class PosControl : MonoBehaviour
         nextAITarget = NextAI.GetComponent<AIGroundControl>().nextTarget;
         nextAILap = NextAI.GetComponent<AIGroundControl>().Lap;
         prevAITarget = PrevAI.GetComponent<AIGroundControl>().nextTarget;
-        playerNextTarget = Player.GetComponent<CarGroundControl>().nextTarget;
-
+        //playerNextTarget = Player.GetComponent<CarGroundControl>().nextTarget;
+        playerNextTarget = PlayerGround.GetComponent<CarTargetTrigger>().nextTarget;
         {
             if (Lap == nextAILap) //SAME LAP
             {
@@ -168,7 +169,8 @@ public class PosControl : MonoBehaviour
     private void GetTargetDistances()
     {
         nextAITargetDist = NextAI.GetComponent<AIGroundControl>().TargetDistance;
-        playerTargetDistance = Player.GetComponent<CarGroundControl>().TargetDistance;
+        //playerTargetDistance = Player.GetComponent<CarGroundControl>().TargetDistance;
+        playerTargetDistance = PlayerGround.GetComponent<CarTargetTrigger>().TargetDistance;
         //nextAITargetDist = Mathf.Round(nextAITargetDist * 100f) / 100f;
         //prevAITargetDist = Mathf.Round(prevAITargetDist * 100f) / 100f;
 

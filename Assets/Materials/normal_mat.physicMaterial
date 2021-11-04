@@ -9,6 +9,6 @@ PhysicMaterial:
   m_Name: normal_mat
   dynamicFriction: 0.6
   staticFriction: 0.6
-  bounciness: 1
-  frictionCombine: 2
-  bounceCombine: 2
+  bounciness: 0
+  frictionCombine: 0
+  bounceCombine: 0

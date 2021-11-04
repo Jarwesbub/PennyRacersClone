@@ -4,23 +4,30 @@ using UnityEngine;
 
 public class AIController : MonoBehaviour
 {
+    public DataManager dataManager;
     //public GameObject[] AINumb;
     //public GameObject[] Target;
     public List<GameObject> AINumb;
-    private GameObject TargetController, AICars, Player;
+    private GameObject TargetController, AICars, Player, PlayerController;
     public List<Vector3> targetPosList = new List<Vector3>();
     //public int TargetNumb;
-    public int MaxLaps;
     [SerializeField]
     private float AISpeed, MaxSpeed, Acc, AccLerp, CurrentAcc, TurnSpeed;
     
-    public int AICount, AIEngineClass, TargetCount;
-    public bool PLAYERAUTOPILOT = false; //TESTING
+    public int MaxLaps, AICount, AIEngineClass, TargetCount;
+    //public bool PLAYERAUTOPILOT = false; //TESTING
     void Awake()
     {
+        if(dataManager == null)
+            dataManager = GameObject.FindWithTag("DataManager").GetComponent<DataManager>();
+
         TargetController = GameObject.FindWithTag("TargetController");
         AICars = GameObject.FindWithTag("AICars");
         Player = GameObject.FindWithTag("Player");
+        PlayerController = GameObject.FindWithTag("PlayerController");
+
+        dataManager.Load();
+        MaxLaps = dataManager.data.MaxLaps;
 
         if (AINumb.Count == 0)
         {
@@ -40,11 +47,11 @@ public class AIController : MonoBehaviour
         Player.GetComponent<AIGroundControl>().enabled = false;
 
     }
-    public void PlayerAutopilot()
+    public void StartPlayerAutopilot()
     {
         Player.GetComponent<CarGroundControl>().enabled = false;
         Player.GetComponent<AIGroundControl>().enabled = true;
-
+        PlayerController.SetActive(false);
 
     }
 
@@ -67,6 +74,7 @@ public class AIController : MonoBehaviour
             AICount = AINumb.Count;
             AINumb[i].GetComponent<AIGroundControl>().AIControllerStartUp(i, AICount, AIEngineClass, AccLerp, TurnSpeed, MaxSpeed);
             AINumb[i].GetComponent<AIGroundControl>().AllTargets(targetPosList, TargetCount);
+            AINumb[i].GetComponent<AIGroundControl>().MaxLaps = MaxLaps;
         }
 
     }

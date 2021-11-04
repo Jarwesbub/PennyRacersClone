@@ -11,30 +11,41 @@ public class GetPlayerStats : MonoBehaviour
 
     public TMP_Text t_playername;
 
-    private int engineClass;
-    private float enginePower, acc;
+    private int engineClass, aiEngineClass;
+    private float enginePower, acc, turning, grip;
 
     //void EngineClassesListed(int level)
     void Awake()
     {
-        dataManager.Load();
+        GetAllStats();
 
-        t_playername.text = ("Player: ") + dataManager.data.name;
-
-        GetCarEngineStats();
-        GetCarAccStats();
-
+        //GetCarEngineStats();
+        //GetCarAccStats();
+        
         PlayerController.GetComponent<CarController>().EnginePower = enginePower;
         PlayerController.GetComponent<CarController>().Acceleration = acc;
-        int aiengineclass = dataManager.data.AIEngineClass;
-        AIController.GetComponent<AIController>().AIEngineClass = aiengineclass;//AI 
+        PlayerController.GetComponent<CarController>().Turning = turning;
+        PlayerController.GetComponent<CarController>().Grip = grip;
+        AIController.GetComponent<AIController>().AIEngineClass = aiEngineClass;//AI 
+        
+    }
+    void GetAllStats()
+    {
+        dataManager.Load();
+        t_playername.text = ("Player: ") + dataManager.data.name;
 
+        engineClass = dataManager.data.EngineClass;
+        enginePower = dataManager.data.EnginePower;
+        acc = dataManager.data.Acc;
+        turning = dataManager.data.Turning;
+        grip = dataManager.data.Grip;
+        aiEngineClass = dataManager.data.AIEngineClass;
     }
 
 
+    /*
     private void GetCarEngineStats()
     {
-        
         engineClass = dataManager.data.EngineClass;
 
         switch(engineClass)
@@ -91,6 +102,7 @@ public class GetPlayerStats : MonoBehaviour
         dataManager.Save();
 
     }
+    */
     /*
     private void OLDGetCarEngineStats()
     {
