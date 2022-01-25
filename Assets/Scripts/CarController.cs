@@ -2,13 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
-
+//Full car controlling scheme stacked to one script
 public class CarController : MonoBehaviour
 {
     public GameObject Car;
     //public GameObject PlayerData;
     private GameObject GameController, AIController;
-    public TMP_Text SpeedTxt;
+    public TMP_Text SpeedTxt; //Speed data for speed-o-meter
 
     Rigidbody rb;
     Collider col;
@@ -20,8 +20,8 @@ public class CarController : MonoBehaviour
     //public float MobileTurningBuff;
     public int UIbuttonVertical; //1=gas, -1=brake; //This is vertical input on buttons "gas pedal and brake pedal"
     //slide power speed nerf
-    public float TEST, TEST2; //DELETE WHEN NOT IN TEST USE!
-    public float Steps, driftWaitSteps; //How many steps/fixed frames
+    //public float TEST, TEST2; //DELETE WHEN NOT IN TEST USE!
+    public float Steps/*, driftWaitSteps*/; //How many steps/fixed frames
 
     //Non changeable values (so far) horizDP and verNP are rigidbody force -values that gives better drifting experience
     //public float MinimumDriftValue;
@@ -29,9 +29,9 @@ public class CarController : MonoBehaviour
     //Accessable values from other scripts: (can be changed anytime) all public floats
     public float Speed, EnginePower, Acceleration, MaxSpeed, Brake, Grip;
     public float Turning = 0.8f, BrakeTurn = 1.8f;
-    public float DynFriction, StatFriction; //These are Car's current stats for rb physics material //Dynamic- and Static Friction
+    //public float DynFriction, StatFriction; //These are Car's current stats for rb physics material //Dynamic- and Static Friction
 
-    [SerializeField] //FOR DEBUGGING
+    //[SerializeField] //FOR DEBUGGING
     private float SpeedLimiter, CarMass, CurrentAcceleration, DriftVal, DriftAccBuff, rbDriftBuff; //CurAcc/DriftCalc = show FixedUpdate values; PosZ = where Car is facing before spawning
 
     private float AddSpeed, ReverseSpeed, ReverseMaxSpeed, DriftValToAxis, CurrRotation; //AddSpeed must be 750f!
@@ -83,7 +83,7 @@ public class CarController : MonoBehaviour
             Turning *= 1.5f;
 
     }
-    void DriftController(bool IsNotKeyboard)
+    void DriftController(bool IsNotKeyboard) //Control your drift values based on Speed- and turning values (in FixedUpdate) 
     {
         rbDriftBuff = 0f;
         float input = horizontalInput;
@@ -198,7 +198,6 @@ public class CarController : MonoBehaviour
 
 
     }
-
 
     void FixedUpdate()
     {
@@ -319,7 +318,7 @@ public class CarController : MonoBehaviour
         
     }
 
-    private void CarAllTurningInputs(float driftvalue)
+    private void CarAllTurningInputs(float driftvalue) //Player's turning values combined with drift value
     {
         if (Speed > 0)
         {
@@ -328,8 +327,7 @@ public class CarController : MonoBehaviour
 
                 float rotValue = Turning;
 
-
-                if (IsBraking == true) //BACKWADS TURNING
+                if (IsBraking) //BACKWADS TURNING
                 {
                     //float TurnValue = horizontalInput;
                     rotValue = (Turning * BrakeTurn)/* * TurnValue*/;
@@ -351,7 +349,6 @@ public class CarController : MonoBehaviour
 
                 if (horizontalInput > 0.01f) //TURN RIGHT
                 {
-
                     rotValue *= driftvalue+1f;
 
                 }
@@ -361,7 +358,7 @@ public class CarController : MonoBehaviour
 
                 }
 
-                if (IsHitting == false && IsGrounded)
+                if (!IsHitting && IsGrounded)
                 {
                     rotValue *= horizontalInput;
                     Vector3 m_EulerAngleVelocity = new Vector3(0, rotValue * 30f, 0);
@@ -374,7 +371,7 @@ public class CarController : MonoBehaviour
         }
     }
 
-    private void CarGoForwardInputs()
+    private void CarGoForwardInputs() //Player's forward moving control based on car's stats
     {
         //if (Input.GetKey("w") || Input.GetKey("up")) //GAS GAS GAS/////////////////////////////
         if(verticalInput > 0.01f) // GAS
@@ -432,7 +429,7 @@ public class CarController : MonoBehaviour
 
     }
 
-    private void CarGoBackwardsBrakingInputs()
+    private void CarGoBackwardsBrakingInputs() //Player's reverse moving input
     {
         //if (Input.GetKey("s") || Input.GetKey("down")/* && IsDrifting == false*/) //BREAKING
         if(verticalInput < -0.2f)
@@ -478,11 +475,11 @@ public class CarController : MonoBehaviour
         }
     }
 
-    private void StopAcceleratingForward(bool NoReverse) //GROUND
+    private void StopAcceleratingForward(bool NoReverse) //Player is not hitting gas pedal and no braking (On GROUND)
     {
-        if (NoReverse == true)
+        if (NoReverse)
         {
-            if (IsBraking == false)
+            if (!IsBraking)
             {
                 LoseSpeed -= 1.8f; // How much car loses speed when not accelerating (per fixed frame)
                 rb.AddRelativeForce(new Vector3(rbDriftBuff, -1f, SpeedLimiter * CarMass * CurrentAcceleration * LoseSpeed * Time.deltaTime));//CarMass = rb.mass*10f
@@ -510,7 +507,7 @@ public class CarController : MonoBehaviour
         AIController.GetComponent<AIController>().StartPlayerAutopilot();
     }*/
 
-    void Update() // UI STUFF
+    void Update() // Draw Speed-o-meter values on string
     {
         float SpeedDecimal = Mathf.Round(Speed * 1f);
 

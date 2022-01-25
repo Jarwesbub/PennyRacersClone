@@ -52,6 +52,9 @@ public class AIGroundControl : MonoBehaviour
         */
         Lap = 1;
         //MaxLaps = LapController.GetComponent<LapControl>().MaxLaps;
+        
+        if (IsAI) //Hide Unity's "VALUE NEVER USED" -message
+            IsAI = true;
     }
     void OnEnable()
     {
