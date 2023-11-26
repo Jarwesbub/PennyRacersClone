@@ -1,4 +1,6 @@
-# PennyRacersClone
+# PennyRacersClone (demo)
+
+https://www.youtube.com/watch?v=tdy9ZAxmlzs
 
 - This repository contains the latest version of my untitled racing game project made in Unity platform
 - All C# codes are located in "PennyRacersClone/Assets/Scripts" which are my own writing (except some minor debugging scripts)
