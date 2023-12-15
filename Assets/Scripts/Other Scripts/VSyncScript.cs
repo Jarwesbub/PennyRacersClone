@@ -2,13 +2,13 @@ using UnityEngine;
 
 public class VSyncScript : MonoBehaviour
 {
-    public int VSyncValue; //0-4
-    public int MaxFrameRate;
+    public int vSyncValue; //0-4
+    public int maxFrameRate;
 
     void Start()
     {
         // Sync framerate to monitors refresh rate
-        QualitySettings.vSyncCount = VSyncValue;
-        Application.targetFrameRate = MaxFrameRate;
+        QualitySettings.vSyncCount = vSyncValue;
+        Application.targetFrameRate = maxFrameRate;
     }
 }

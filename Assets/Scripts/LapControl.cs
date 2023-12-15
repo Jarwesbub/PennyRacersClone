@@ -44,7 +44,7 @@ public class LapControl : MonoBehaviour
 
         dataManager.Load();
         PlayerName = dataManager.data.name;
-        MaxLaps = dataManager.data.MaxLaps;
+        MaxLaps = dataManager.data.maxLaps;
 
         DrawLaps(1);
         //CurrentTime = 200f; //TESTING DELETE!!!!!!!!!!!!!!!!!
@@ -141,7 +141,7 @@ public class LapControl : MonoBehaviour
                 name = PlayerName.ToString();
                 Leaderboard.Add(pos + space + name);
                 //PLAYER AUTOPILOT ON!
-                AIController.GetComponent<AIController>().StartPlayerAutopilot();
+                AIController.GetComponent<BotController>().StartPlayerAutopilot();
                 //PlayerCar.GetComponent<CarGroundControl>().Autopilot = true;
                 PlayerController.SetActive(false); //Multiple leaderboards if true
                 StartCoroutine(WaitHighscores());
@@ -151,7 +151,7 @@ public class LapControl : MonoBehaviour
                 //Names.Add(name);
                 Leaderboard.Add(pos + space + name);
                 GameObject ai = AICars.gameObject.transform.GetChild(number).gameObject;
-                ai.GetComponent<AIGroundControl>().RaceIsOver = true;
+                ai.GetComponent<BotGroundControl>().raceIsOver = true;
             }
             //Add leaderboard results in loop command
             string result = "";

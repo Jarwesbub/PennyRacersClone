@@ -75,7 +75,7 @@ public class EnginePowerScript : MonoBehaviour
         {
             Acc = 0.87f; //0.86f
         }
-        PlayerController.GetComponent<CarController>().Acceleration = Acc;
+        PlayerController.GetComponent<CarController>().acceleration = Acc;
     }
 
     void EngineClassesListed(int level)
@@ -113,9 +113,9 @@ public class EnginePowerScript : MonoBehaviour
         }
 
 
-        PlayerController.GetComponent<CarController>().EnginePower = EnginePower;
-        PlayerController.GetComponent<CarController>().Acceleration = Acc;
-        AIController.GetComponent<AIController>().GetAccLevels(EngineClass);
+        PlayerController.GetComponent<CarController>().enginePower = EnginePower;
+        PlayerController.GetComponent<CarController>().acceleration = Acc;
+        AIController.GetComponent<BotController>().GetAccLevels(EngineClass);
         
     }
 

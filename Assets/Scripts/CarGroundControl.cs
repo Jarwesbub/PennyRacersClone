@@ -4,9 +4,8 @@ using UnityEngine;
 
 public class CarGroundControl : MonoBehaviour
 {
-    public GameObject Ground;
-    public GameObject PlayerController, PlayerGround;
-    public GameObject MainCamera;
+    private GameObject PlayerController, PlayerGround;
+    private GameObject MainCamera;
     private GameObject TargetController;
     public List<Vector3> targetPosList;
     private int nextTarget, targetCount;
@@ -78,7 +77,7 @@ public class CarGroundControl : MonoBehaviour
 
     IEnumerator RespawnCooldown(float sec)
     {
-        PlayerController.GetComponent<CarController>().ResetPlayer = true;
+        PlayerController.GetComponent<CarController>().resetPlayer = true;
 
         yield return new WaitForSeconds(sec);
 
@@ -88,7 +87,7 @@ public class CarGroundControl : MonoBehaviour
 
         RespawnPosition();
 
-        PlayerController.GetComponent<CarController>().ResetPlayer = false;
+        PlayerController.GetComponent<CarController>().resetPlayer = false;
     }
 
 

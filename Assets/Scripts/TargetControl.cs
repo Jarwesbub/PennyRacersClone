@@ -10,7 +10,7 @@ public class TargetControl : MonoBehaviour
     public List<GameObject> Target;
     public int TargetCount,PlayerTargetNumber;
     [SerializeField]//DEBUG
-    private GameObject Player, PlayerGround, PlayerController, TargetParent, AICars, AIController, LapController;
+    private GameObject Player, PlayerGround, PlayerController, TargetParent, BotCarsParent, BotController, LapController;
     [SerializeField]
     private List<Vector3> targetPosList;
     public List<GameObject> playerTargets;
@@ -31,8 +31,8 @@ public class TargetControl : MonoBehaviour
         PlayerGround = GameObject.FindWithTag("PlayerGround");
         PlayerController = GameObject.FindWithTag("PlayerController");
         TargetParent = GameObject.FindWithTag("TargetParent");
-        AICars = GameObject.FindWithTag("AICars");
-        AIController = GameObject.FindWithTag("aicontroller");
+        BotCarsParent = GameObject.FindWithTag("AICars");
+        BotController = GameObject.FindWithTag("aicontroller");
         LapController = GameObject.FindWithTag("LapController");
         MaxLaps = LapController.GetComponent<LapControl>().MaxLaps;
 
@@ -55,7 +55,7 @@ public class TargetControl : MonoBehaviour
             Vector3 targetpos = Target[i].transform.position;
 
             targetPosList.Add(targetpos);
-            AIController.GetComponent<AIController>().LoadAllTargets(targetpos);
+            BotController.GetComponent<BotController>().LoadAllTargets(targetpos);
             Player.GetComponent<CarGroundControl>().LoadAllTargets(targetpos);
             PlayerGround.GetComponent<CarTargetTrigger>().LoadAllTargets(targetpos);
             //AIController.GetComponent<AIController>().TargetCount = TargetCount;

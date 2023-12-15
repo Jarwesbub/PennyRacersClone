@@ -22,7 +22,7 @@ public class UIDebugScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        isDrifting = PlayerController.GetComponent<CarController>().IsDrifting;
+        isDrifting = PlayerController.GetComponent<CarController>().isDrifting;
         float turning = PlayerController.GetComponent<CarController>().horizontalInput;
 
         if (isDrifting)

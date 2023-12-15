@@ -6,8 +6,8 @@ public class PlayerData
 {
     public string name = "";
 
-    public int EngineClass, AccLvl, AIEngineClass;
-    public int MaxLaps;
-    public float EnginePower, Acc, Turning, Grip;
-    public bool UIJoystick, UIbuttonPedals;
+    public int engineClass, accLvl, botEngineClass;
+    public int maxLaps;
+    public float enginePower, acc, turning, grip;
+    public bool uiJoystick, uiButtonPedals;
 }

@@ -16,7 +16,7 @@ public class AccelerationScript : MonoBehaviour
     {
         AccClass = 1;
         AccStatsListed(AccClass);
-        EnginePow = PlayerController.GetComponent<CarController>().EnginePower;
+        EnginePow = PlayerController.GetComponent<CarController>().enginePower;
     }
 
 
@@ -46,7 +46,7 @@ public class AccelerationScript : MonoBehaviour
     {
         Acc = 0f;
 
-        EnginePow = PlayerController.GetComponent<CarController>().EnginePower;
+        EnginePow = PlayerController.GetComponent<CarController>().enginePower;
 
         if (level == 1)
         {
@@ -63,6 +63,6 @@ public class AccelerationScript : MonoBehaviour
             Acc = 0.865f;
         }
 
-        PlayerController.GetComponent<CarController>().Acceleration = Acc;
+        PlayerController.GetComponent<CarController>().acceleration = Acc;
     }
 }

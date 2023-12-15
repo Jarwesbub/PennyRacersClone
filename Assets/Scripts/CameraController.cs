@@ -9,14 +9,14 @@ public class CameraController : MonoBehaviour
     public GameObject CameraPosition; //Where camera "sits"
     public GameObject CameraLookAtPosition; //Where camera looks
     public GameObject BackCamera;
-    public GameObject AICars/*, PlayerCamera*/;
+    public GameObject BotCars;
 
 
     public float GroundTime;
     public float AirTime;
     private int CamSet;
-    Vector3 CameraOffset, FixedCameraPosition;
-    //[SerializeField]//DEBUG
+    [SerializeField]  Vector3 CameraOffset, FixedCameraPosition;
+    [SerializeField]//DEBUG
     private int LookCommander = 0;
     private bool holdbutton = false;
     public bool useUIjoystick = false;
@@ -24,15 +24,11 @@ public class CameraController : MonoBehaviour
 
     private void Awake()
     {
-        /*
-        if(PlayerCamera == null)
-            PlayerCamera = GameObject.FindWithTag("PlayerCamera");
-        */
         CameraOffset = CameraPosition.transform.position;
         gameObject.transform.position = CameraOffset;
         CamSet = 1;
 
-        CameraFollow(-1);//player
+        CameraFollow(-1); // player
 
     }
     public void ButtonLookBack()
@@ -51,25 +47,22 @@ public class CameraController : MonoBehaviour
 
     private void FixedUpdate()
     {
-
+        if (Input.GetKey(KeyCode.LeftShift) || backCameraButton == 1)
         {
-            if (Input.GetKey(KeyCode.LeftShift) || backCameraButton == 1)
-            {
-                FixedCameraPosition = BackCamera.transform.position;
-                LookCommander = 2;
-                Follow(CamSet);
-            }
-            else if (LookCommander == 2/* || backCameraButton == -1*/)
-            {
-                FixedCameraPosition = CameraPosition.transform.position;
-                LookCommander = 1;
-                Follow(CamSet);
-            }
-            else if (LookCommander == 0 || backCameraButton == 0)//reset
-            {
-                FixedCameraPosition = CameraPosition.transform.position;
-                Follow(CamSet);
-            }
+            FixedCameraPosition = BackCamera.transform.position;
+            LookCommander = 2;
+            Follow(CamSet);
+        }
+        else if (LookCommander == 2/* || backCameraButton == -1*/)
+        {
+            FixedCameraPosition = CameraPosition.transform.position;
+            LookCommander = 1;
+            Follow(CamSet);
+        }
+        else if (LookCommander == 0 || backCameraButton == 0)//reset
+        {
+            FixedCameraPosition = CameraPosition.transform.position;
+            Follow(CamSet);
         }
     }
 
@@ -87,35 +80,35 @@ public class CameraController : MonoBehaviour
 
         if (holdbutton == true)
         {
-            if (Input.GetKey(KeyCode.Keypad9))//player
+            if (Input.GetKey(KeyCode.Alpha9))//player
             {
                 CameraFollow(-1);
             }
-            else if (Input.GetKey(KeyCode.Keypad0))
+            else if (Input.GetKey(KeyCode.Alpha0))
             {
                 CameraFollow(0);
             }
-            else if (Input.GetKey(KeyCode.Keypad1))
+            else if (Input.GetKey(KeyCode.Alpha1))
             {
                 CameraFollow(1);
             }
-            else if (Input.GetKey(KeyCode.Keypad2))
+            else if (Input.GetKey(KeyCode.Alpha2))
             {
                 CameraFollow(2);
             }
-            else if (Input.GetKey(KeyCode.Keypad3))
+            else if (Input.GetKey(KeyCode.Alpha3))
             {
                 CameraFollow(3);
             }
-            else if (Input.GetKey(KeyCode.Keypad4))
+            else if (Input.GetKey(KeyCode.Alpha4))
             {
                 CameraFollow(4);
             }
-            else if (Input.GetKey(KeyCode.Keypad5))
+            else if (Input.GetKey(KeyCode.Alpha5))
             {
                 CameraFollow(5);
             }
-            else if (Input.GetKey(KeyCode.Keypad6))
+            else if (Input.GetKey(KeyCode.Alpha6))
             {
                 CameraFollow(6);
             }
@@ -145,10 +138,11 @@ public class CameraController : MonoBehaviour
             CameraLookAtPosition = cameralookatposition;
             backcamera = Player.transform.GetChild(2).gameObject;
             BackCamera = backcamera;
+            Debug.Log("Camera follows player!");
         }
         else // AI
         {
-            GameObject AInumb = AICars.transform.GetChild(number).gameObject;
+            GameObject AInumb = BotCars.transform.GetChild(number).gameObject;
             cameraposition = AInumb.transform.GetChild(0).gameObject;
             CameraPosition = cameraposition;
             cameralookatposition = AInumb.transform.GetChild(1).gameObject;

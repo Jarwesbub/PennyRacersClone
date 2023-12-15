@@ -5,25 +5,27 @@ using UnityEngine;
 public class MobileConvert : MonoBehaviour
 {
     public DataManager dataManager;
-    public bool IsMobilePlatform;
-    [SerializeField]
-    private bool useUIJoystick, UIbuttonPedalsActive;
     public GameObject MobileUIObj, MobileUIpedals;
-    private GameObject PlayerController;
+    GameObject PlayerController;
+
+    public bool isMobilePlatform;
+    [SerializeField]
+    bool useUIJoystick, uiButtonPedalsActive;
+
 
     void Awake()
     {
         dataManager.Load();
-        useUIJoystick = dataManager.data.UIJoystick;
-        UIbuttonPedalsActive = dataManager.data.UIbuttonPedals;
+        useUIJoystick = dataManager.data.uiJoystick;
+        uiButtonPedalsActive = dataManager.data.uiButtonPedals;
 
-        if (useUIJoystick || IsMobilePlatform)
+        if (useUIJoystick || isMobilePlatform)
         {
             PlayerController = GameObject.FindWithTag("PlayerController");
             PlayerController.GetComponent<CarController>().useUIjoystick = true;
             MobileUIObj.SetActive(true);
 
-            if (UIbuttonPedalsActive)
+            if (uiButtonPedalsActive)
             {
                 PlayerController.GetComponent<CarController>().UIbuttonPedals = true;
                 MobileUIpedals.SetActive(true);
@@ -43,13 +45,9 @@ public class MobileConvert : MonoBehaviour
     }
 
 
-
-
-    // Start is called before the first frame update
     void Start()
     {
         gameObject.SetActive(false);
-        //Destroy(gameObject);
     }
 
 }

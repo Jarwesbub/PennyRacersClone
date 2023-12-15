@@ -5,10 +5,10 @@ using UnityEngine;
 public class HideObjectInGame : MonoBehaviour
 {
     private Renderer rend;
-    public bool HideObject;
+    public bool hideObject;
     void Awake()
     {
-        if (HideObject)
+        if (hideObject)
         {
             rend = gameObject.GetComponent<Renderer>();
             rend.enabled = false;

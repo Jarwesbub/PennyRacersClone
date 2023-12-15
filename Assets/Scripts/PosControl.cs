@@ -67,9 +67,9 @@ public class PosControl : MonoBehaviour
         PlayerPosTxt.text = "Pos: "+playerposadd.ToString()+th;
         
         Lap = TargetController.GetComponent<TargetControl>().Laps;    
-        nextAITarget = NextAI.GetComponent<AIGroundControl>().nextTarget;
-        nextAILap = NextAI.GetComponent<AIGroundControl>().Lap;
-        prevAITarget = PrevAI.GetComponent<AIGroundControl>().nextTarget;
+        nextAITarget = NextAI.GetComponent<BotGroundControl>().nextTarget;
+        nextAILap = NextAI.GetComponent<BotGroundControl>().lap;
+        prevAITarget = PrevAI.GetComponent<BotGroundControl>().nextTarget;
         //playerNextTarget = Player.GetComponent<CarGroundControl>().nextTarget;
         playerNextTarget = PlayerGround.GetComponent<CarTargetTrigger>().nextTarget;
         {
@@ -168,7 +168,7 @@ public class PosControl : MonoBehaviour
 
     private void GetTargetDistances()
     {
-        nextAITargetDist = NextAI.GetComponent<AIGroundControl>().TargetDistance;
+        nextAITargetDist = NextAI.GetComponent<BotGroundControl>().targetDistance;
         //playerTargetDistance = Player.GetComponent<CarGroundControl>().TargetDistance;
         playerTargetDistance = PlayerGround.GetComponent<CarTargetTrigger>().TargetDistance;
         //nextAITargetDist = Mathf.Round(nextAITargetDist * 100f) / 100f;

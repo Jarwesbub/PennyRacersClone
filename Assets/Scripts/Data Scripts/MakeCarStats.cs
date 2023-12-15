@@ -11,11 +11,11 @@ public class MakeCarStats : MonoBehaviour
     private float Turning, Grip;
 
     public InputField playerName;
-    public int EngineClass,AIEngineClass;
     public TMP_Text t_engineclass, t_acc, t_aiengineclass, t_maxlaps, t_turning, t_grip;
-
     public DataManager dataManager;
-    public int MaxLaps;
+
+    private int engineClass, botEngineClass;
+    private int maxLaps;
 
     void Awake()
     {
@@ -28,51 +28,50 @@ public class MakeCarStats : MonoBehaviour
     void Start()
     {
         dataManager.Load();
-        UIJoystickButton.GetComponent<Toggle>().isOn = dataManager.data.UIJoystick;
-        UIPedalsButton.GetComponent<Toggle>().isOn = dataManager.data.UIbuttonPedals;
+        UIJoystickButton.GetComponent<Toggle>().isOn = dataManager.data.uiJoystick;
+        UIPedalsButton.GetComponent<Toggle>().isOn = dataManager.data.uiButtonPedals;
         playerName.text = dataManager.data.name;
         ButtonSetMaxLaps(false);
-        //t_engineclass.text = ("Engine Power =") + dataManager.data.EngineClass.ToString();
-        AIEngineClass = dataManager.data.AIEngineClass;
+        botEngineClass = dataManager.data.botEngineClass;
         FirstFrameCheck();
     }
 
     private void FirstFrameCheck()
     {
         
-        int engineClass = dataManager.data.EngineClass;
+        int engineClass = dataManager.data.engineClass;
         if (engineClass == 0)
         {
             engineClass = 1;
-            dataManager.data.EngineClass = engineClass;
-            dataManager.data.AIEngineClass = engineClass;
-            dataManager.data.AccLvl = engineClass;
+            dataManager.data.engineClass = engineClass;
+            dataManager.data.botEngineClass = engineClass;
+            dataManager.data.accLvl = engineClass;
             dataManager.Save();
         }
         
         //If somehow Acceleration = 0 this fixes it to 1
-        int Acc = dataManager.data.AccLvl;
+        int Acc = dataManager.data.accLvl;
         if (Acc == 0)
         {
             Acc = 1;
-            dataManager.data.AccLvl = Acc;
+            dataManager.data.accLvl = Acc;
             dataManager.Save();
         }
         GetCarEngineStats();
         GetCarAccStats();
         GetOtherStats();
 
-        t_engineclass.text = ("Engine Power\n") + dataManager.data.EngineClass.ToString();
-        t_acc.text = ("Acceleration\n") + dataManager.data.AccLvl.ToString();
-        t_aiengineclass.text = ("AI's Engine Power\n") + dataManager.data.AIEngineClass.ToString();
-        t_aiengineclass.text = ("AI's Engine Power\n") + dataManager.data.AIEngineClass.ToString();
-        t_turning.text = ("Turning\n") + dataManager.data.Turning.ToString();
-        t_grip.text = ("Grip\n") + dataManager.data.Grip.ToString();
+        t_engineclass.text = ("Engine Power\n") + dataManager.data.engineClass.ToString();
+        t_acc.text = ("Acceleration\n") + dataManager.data.accLvl.ToString();
+        t_aiengineclass.text = ("AI's Engine Power\n") + dataManager.data.botEngineClass.ToString();
+        t_aiengineclass.text = ("AI's Engine Power\n") + dataManager.data.botEngineClass.ToString();
+        t_turning.text = ("Turning\n") + dataManager.data.turning.ToString();
+        t_grip.text = ("Grip\n") + dataManager.data.grip.ToString();
     }
 
     private void GetCarEngineStats()
     {
-        int engineClass = dataManager.data.EngineClass;
+        int engineClass = dataManager.data.engineClass;
         float enginePower = 2.48f;
 
         switch (engineClass)
@@ -101,14 +100,14 @@ public class MakeCarStats : MonoBehaviour
                 break;
         }
 
-        dataManager.data.EnginePower = enginePower;
+        dataManager.data.enginePower = enginePower;
         dataManager.Save();
 
     }
 
     private void GetCarAccStats()
     {
-        int accLevel = dataManager.data.AccLvl;
+        int accLevel = dataManager.data.accLvl;
         float acc = 0.850f;
 
         if (accLevel == 1 || accLevel == 0)
@@ -125,15 +124,15 @@ public class MakeCarStats : MonoBehaviour
         {
             acc = 0.88f; //0.87f
         }
-        dataManager.data.Acc = acc;
+        dataManager.data.acc = acc;
         dataManager.Save();
 
     }
 
     private void GetOtherStats()
     {
-        float turning = dataManager.data.Turning;
-        float grip = dataManager.data.Grip;
+        float turning = dataManager.data.turning;
+        float grip = dataManager.data.grip;
 
         if (turning == 0f)
             turning = 1f;
@@ -151,16 +150,16 @@ public class MakeCarStats : MonoBehaviour
 
     public void ClickForEngineClass()
     {
-        int engineClass = dataManager.data.EngineClass;
+        int engineClass = dataManager.data.engineClass;
         int maxValue = 6;
         if (engineClass < maxValue)
             engineClass += 1;
         else
             engineClass = 1;
 
-        dataManager.data.EngineClass = engineClass;
+        dataManager.data.engineClass = engineClass;
         GetCarEngineStats();
-        t_engineclass.text = ("Engine Power\n") + dataManager.data.EngineClass.ToString();
+        t_engineclass.text = ("Engine Power\n") + dataManager.data.engineClass.ToString();
 
         ClickForAIEnginePower(true);
 
@@ -178,8 +177,8 @@ public class MakeCarStats : MonoBehaviour
             Turning -= add;
 
         }
-        dataManager.data.Turning = Turning;
-        t_turning.text = ("Turning\n") + dataManager.data.Turning.ToString();
+        dataManager.data.turning = Turning;
+        t_turning.text = ("Turning\n") + dataManager.data.turning.ToString();
     }
     public void ClickForGrip(bool isPositive)
     {
@@ -187,36 +186,34 @@ public class MakeCarStats : MonoBehaviour
         if (isPositive)
         {
             Grip += add;
-
         }
         else
         {
             Grip -= add;
-
         }
-        dataManager.data.Grip = Grip;
-        t_grip.text = ("Grip\n") + dataManager.data.Grip.ToString();
+        dataManager.data.grip = Grip;
+        t_grip.text = ("Grip\n") + dataManager.data.grip.ToString();
     }
 
 
     public void ClickForAccelaration()
     {
-        int accLVL = dataManager.data.AccLvl;
+        int accLVL = dataManager.data.accLvl;
 
         if (accLVL < 3)
             accLVL += 1;
         else
             accLVL = 1;
 
-        dataManager.data.AccLvl = accLVL;
+        dataManager.data.accLvl = accLVL;
         GetCarAccStats();
-        t_acc.text = ("Acceleration\n") + dataManager.data.AccLvl.ToString();
+        t_acc.text = ("Acceleration\n") + dataManager.data.accLvl.ToString();
 
     }
 
     public void ClickForAIEnginePower(bool SameAsPlayer)
     {
-        int aiengineclass = dataManager.data.AIEngineClass;
+        int aiengineclass = dataManager.data.botEngineClass;
 
         if (SameAsPlayer == false)
         {
@@ -226,11 +223,11 @@ public class MakeCarStats : MonoBehaviour
                 aiengineclass = 0;
         }
         else
-            aiengineclass = dataManager.data.EngineClass;//Same class as the player
+            aiengineclass = dataManager.data.engineClass;//Same class as the player
 
         
-        dataManager.data.AIEngineClass = aiengineclass;
-        t_aiengineclass.text = ("AI's Engine Power\n") + dataManager.data.AIEngineClass.ToString();
+        dataManager.data.botEngineClass = aiengineclass;
+        t_aiengineclass.text = ("AI's Engine Power\n") + dataManager.data.botEngineClass.ToString();
 
         
     }
@@ -255,12 +252,12 @@ public class MakeCarStats : MonoBehaviour
 
         if (joystick)
         {
-            dataManager.data.UIJoystick = true;
+            dataManager.data.uiJoystick = true;
             dataManager.Save();
         }
         else
         {
-            dataManager.data.UIJoystick = false;
+            dataManager.data.uiJoystick = false;
             dataManager.Save();
         }
     }
@@ -271,12 +268,12 @@ public class MakeCarStats : MonoBehaviour
 
         if (usePedals)
         {
-            dataManager.data.UIbuttonPedals = true;
+            dataManager.data.uiButtonPedals = true;
             dataManager.Save();
         }
         else
         {
-            dataManager.data.UIbuttonPedals = false;
+            dataManager.data.uiButtonPedals = false;
             dataManager.Save();
         }
     }
@@ -286,24 +283,24 @@ public class MakeCarStats : MonoBehaviour
         int maxLaps = 6;
 
         dataManager.Load();
-        MaxLaps = dataManager.data.MaxLaps;
-        if (MaxLaps == 0)
-            MaxLaps = 1;
+        this.maxLaps = dataManager.data.maxLaps;
+        if (this.maxLaps == 0)
+            this.maxLaps = 1;
 
 
         if (IsButton)
         {
-            if (MaxLaps < maxLaps)
+            if (this.maxLaps < maxLaps)
             {
-                MaxLaps++;
+                this.maxLaps++;
             }
             else
             {
-                MaxLaps = 1;
+                this.maxLaps = 1;
             }
         }
-        t_maxlaps.text = ("Max Laps = ") + MaxLaps.ToString();
-        dataManager.data.MaxLaps = MaxLaps;
+        t_maxlaps.text = ("Max Laps = ") + this.maxLaps.ToString();
+        dataManager.data.maxLaps = this.maxLaps;
         dataManager.Save();
     }
 }

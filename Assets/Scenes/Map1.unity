@@ -961,11 +961,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   dataManager: {fileID: 1512054434}
-  IsMobilePlatform: 0
-  useUIJoystick: 0
-  UIbuttonPedalsActive: 1
   MobileUIObj: {fileID: 21878379}
   MobileUIpedals: {fileID: 1529494108}
+  isMobilePlatform: 0
+  useUIJoystick: 0
+  uiButtonPedalsActive: 0
 --- !u!4 &107783104 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7554811550642438320, guid: 0a73ae2d42c187e428355e6d74b4de93, type: 3}
@@ -1238,8 +1238,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2a245460aab160b44a233ca554535ff3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  VSyncValue: 60
-  MaxFrameRate: 60
+  vSyncValue: 0
+  maxFrameRate: 0
 --- !u!114 &139293369
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3273,35 +3273,24 @@ MonoBehaviour:
   useUIjoystick: 0
   UIbuttonPedals: 1
   UIbuttonVertical: 0
-  TEST: 80
-  TEST2: 0
-  Steps: 0
-  driftWaitSteps: 0
-  Speed: 0
-  EnginePower: 0
-  Acceleration: 0.9
-  MaxSpeed: 1000
-  Brake: 9.5
-  Grip: 2
-  Turning: 1
-  BrakeTurn: 1.8
-  DynFriction: 0
-  StatFriction: 0
-  SpeedLimiter: 0
-  CarMass: 0
-  CurrentAcceleration: 0
-  DriftVal: 0
-  DriftAccBuff: 0
-  rbDriftBuff: 0
-  GameStart: 0
-  IsDrifting: 0
-  IsAcc: 0
-  IsBraking: 0
-  IsGrounded: 0
-  IsHitting: 0
-  IsOnGrass: 0
-  ResetPlayer: 0
-  Autopilot: 0
+  steps: 0
+  speed: 0
+  enginePower: 0
+  acceleration: 0
+  maxSpeed: 100
+  brake: 0
+  grip: 0
+  turning: 0.8
+  brakeTurn: 1.8
+  gameStart: 0
+  isDrifting: 0
+  isAcc: 0
+  isBraking: 0
+  isGrounded: 0
+  isHitting: 0
+  isOnGrass: 0
+  resetPlayer: 0
+  autopilot: 0
   horizontalInput: 0
   verticalInput: 0
   prevHorizontalInput: 0
@@ -3887,9 +3876,12 @@ MonoBehaviour:
   CameraPosition: {fileID: 1905344067}
   CameraLookAtPosition: {fileID: 216156737}
   BackCamera: {fileID: 821302354}
-  AICars: {fileID: 214862086}
+  BotCars: {fileID: 0}
   GroundTime: 14
   AirTime: 8
+  CameraOffset: {x: 0, y: 0, z: 0}
+  FixedCameraPosition: {x: 0, y: 0, z: 0}
+  LookCommander: 0
   useUIjoystick: 0
 --- !u!81 &392945845
 AudioListener:
@@ -9659,18 +9651,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   dataManager: {fileID: 0}
-  AINumb: []
+  botIDs: []
   targetPosList: []
-  AISpeed: 0
-  MaxSpeed: 0
-  Acc: 0
-  AccLerp: 0
-  CurrentAcc: 0
-  TurnSpeed: 0
-  MaxLaps: 0
-  AICount: 0
-  AIEngineClass: 0
-  TargetCount: 0
+  botSpeed: 0
+  maxSpeed: 0
+  acc: 0
+  accLerp: 0
+  currentAcc: 0
+  turnSpeed: 0
+  maxLaps: 0
+  botCount: 0
+  botEngineClass: 0
+  targetCount: 0
 --- !u!1 &1198344717
 GameObject:
   m_ObjectHideFlags: 0
@@ -9849,15 +9841,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1bbf7a792dc9f6841914af82803f3a1f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  L_wheel: {fileID: 1658453138}
-  R_wheel: {fileID: 449386568}
-  RoadType: 0
-  IsDrifting: 0
-  IsGrounded: 0
-  UIjoystickActive: 0
+  LeftWheel: {fileID: 1658453138}
+  RightWheel: {fileID: 449386568}
+  roadType: 0
+  isDrifting: 0
+  isGrounded: 0
+  uiJoystickActive: 0
   grey: {r: 0.6981132, g: 0.6981132, b: 0.6981132, a: 0.627451}
   brown: {r: 0.5471698, g: 0.19677883, b: 0, a: 0.70980394}
-  TEST: 0
+  test: 0
 --- !u!1 &1256019929
 GameObject:
   m_ObjectHideFlags: 0
@@ -10877,7 +10869,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 188141800930018982, guid: a3ee36c89b753424ba4a74b29d1aa64b, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1.4299998
+      value: 0.938
       objectReference: {fileID: 0}
     - target: {fileID: 188141800930018982, guid: a3ee36c89b753424ba4a74b29d1aa64b, type: 3}
       propertyPath: m_LocalPosition.z
@@ -15268,8 +15260,8 @@ MonoBehaviour:
   PlayerGround: {fileID: 0}
   PlayerController: {fileID: 0}
   TargetParent: {fileID: 0}
-  AICars: {fileID: 0}
-  AIController: {fileID: 0}
+  BotCarsParent: {fileID: 0}
+  BotController: {fileID: 0}
   LapController: {fileID: 0}
   targetPosList: []
   playerTargets: []
