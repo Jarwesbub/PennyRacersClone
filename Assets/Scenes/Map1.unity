@@ -3276,8 +3276,8 @@ MonoBehaviour:
   steps: 0
   speed: 0
   enginePower: 0
-  acceleration: 0
-  maxSpeed: 100
+  acc: 0
+  maxSpeed: 1000
   brake: 0
   grip: 0
   turning: 0.8

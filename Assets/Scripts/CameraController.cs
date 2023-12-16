@@ -11,24 +11,24 @@ public class CameraController : MonoBehaviour
     public GameObject BackCamera;
     public GameObject BotCars;
 
-
-    public float GroundTime;
-    public float AirTime;
-    private int CamSet;
-    [SerializeField]  Vector3 CameraOffset, FixedCameraPosition;
+    // Visible for testing
+    [SerializeField] private float GroundTime, AirTime;
+    private int ObjectID;
     [SerializeField]//DEBUG
-    private int LookCommander = 0;
     private bool holdbutton = false;
     public bool useUIjoystick = false;
-    private int backCameraButton = -1; //-1=not in use
+    [SerializeField]bool isLookingBack = false;
+    private int backCameraButton = -1; // -1=not in use // This variable is used when pressing UI camera button (on mobile)
 
     private void Awake()
     {
-        CameraOffset = CameraPosition.transform.position;
-        gameObject.transform.position = CameraOffset;
-        CamSet = 1;
+        gameObject.transform.position = CameraPosition.transform.position;
+        ObjectID = 1;
 
-        CameraFollow(-1); // player
+        GroundTime = 20;
+        AirTime = 10;
+
+        SetCameraToFollowByID(-1); // player
 
     }
     public void ButtonLookBack()
@@ -41,35 +41,23 @@ public class CameraController : MonoBehaviour
             backCameraButton = 0;
 
 
-        Follow(CamSet);
+        Follow(ObjectID);
 
     }
 
     private void FixedUpdate()
     {
-        if (Input.GetKey(KeyCode.LeftShift) || backCameraButton == 1)
-        {
-            FixedCameraPosition = BackCamera.transform.position;
-            LookCommander = 2;
-            Follow(CamSet);
-        }
-        else if (LookCommander == 2/* || backCameraButton == -1*/)
-        {
-            FixedCameraPosition = CameraPosition.transform.position;
-            LookCommander = 1;
-            Follow(CamSet);
-        }
-        else if (LookCommander == 0 || backCameraButton == 0)//reset
-        {
-            FixedCameraPosition = CameraPosition.transform.position;
-            Follow(CamSet);
-        }
+        Follow(ObjectID);
+
     }
 
     
-    void Update() //Look AI perspective
+    void Update() 
     {
-        if(Input.GetKey("enter"))
+        if (Input.GetKey(KeyCode.LeftShift) || backCameraButton == 1) { isLookingBack = true; }
+        else { isLookingBack = false; }
+
+        if (Input.GetKey("enter"))
         {
             holdbutton = true;
         }
@@ -82,90 +70,73 @@ public class CameraController : MonoBehaviour
         {
             if (Input.GetKey(KeyCode.Alpha9))//player
             {
-                CameraFollow(-1);
+                SetCameraToFollowByID(-1);
             }
             else if (Input.GetKey(KeyCode.Alpha0))
             {
-                CameraFollow(0);
+                SetCameraToFollowByID(0);
             }
             else if (Input.GetKey(KeyCode.Alpha1))
             {
-                CameraFollow(1);
+                SetCameraToFollowByID(1);
             }
             else if (Input.GetKey(KeyCode.Alpha2))
             {
-                CameraFollow(2);
+                SetCameraToFollowByID(2);
             }
             else if (Input.GetKey(KeyCode.Alpha3))
             {
-                CameraFollow(3);
+                SetCameraToFollowByID(3);
             }
             else if (Input.GetKey(KeyCode.Alpha4))
             {
-                CameraFollow(4);
+                SetCameraToFollowByID(4);
             }
             else if (Input.GetKey(KeyCode.Alpha5))
             {
-                CameraFollow(5);
+                SetCameraToFollowByID(5);
             }
             else if (Input.GetKey(KeyCode.Alpha6))
             {
-                CameraFollow(6);
+                SetCameraToFollowByID(6);
             }
             else if (Input.GetKey(KeyCode.Keypad7))
             {
-                CameraFollow(7);
+                SetCameraToFollowByID(7);
             }
             else if (Input.GetKey(KeyCode.Keypad8))
             {
-                CameraFollow(8);
+                SetCameraToFollowByID(8);
             }
         }
 
     }
     
 
-    private void CameraFollow(int number)
+    private void SetCameraToFollowByID(int id)
     {
-        GameObject cameraposition;
-        GameObject cameralookatposition;
-        GameObject backcamera;
-        if (number == -1) // PLAYER
+        if (id == -1) // PLAYER
         {
-            cameraposition = Player.transform.GetChild(0).gameObject;
-            CameraPosition = cameraposition;
-            cameralookatposition = Player.transform.GetChild(1).gameObject;
-            CameraLookAtPosition = cameralookatposition;
-            backcamera = Player.transform.GetChild(2).gameObject;
-            BackCamera = backcamera;
-            Debug.Log("Camera follows player!");
+            CameraPosition = Player.transform.GetChild(0).gameObject;
+            CameraLookAtPosition = Player.transform.GetChild(1).gameObject;
+            BackCamera = Player.transform.GetChild(2).gameObject;
         }
         else // AI
         {
-            GameObject AInumb = BotCars.transform.GetChild(number).gameObject;
-            cameraposition = AInumb.transform.GetChild(0).gameObject;
-            CameraPosition = cameraposition;
-            cameralookatposition = AInumb.transform.GetChild(1).gameObject;
-            CameraLookAtPosition = cameralookatposition;
-            backcamera = AInumb.transform.GetChild(2).gameObject;
-            BackCamera = backcamera;
+            GameObject AInumb = BotCars.transform.GetChild(id).gameObject;
+            CameraPosition = AInumb.transform.GetChild(0).gameObject;
+            CameraLookAtPosition = AInumb.transform.GetChild(1).gameObject;
+            BackCamera = AInumb.transform.GetChild(2).gameObject;
 
         }
-        CameraOffset = CameraPosition.transform.position;
-        gameObject.transform.position = CameraOffset;
+
+        gameObject.transform.position = CameraPosition.transform.position;
     }
 
     public void ChangeCameraSettings(int value)
     {
-        if (value == 1)
-        {
-            CamSet = value;
-        }
+        ObjectID = value;
 
-        else if (value == 2)
-        {
-            CamSet = value;
-        }
     }
 
     void Follow(int value)
@@ -173,7 +144,6 @@ public class CameraController : MonoBehaviour
         //value 1 = Follow car normally
         //value 2 = Follow slower -> car is not grounded (flying)
         float lerptime = GroundTime;
-        Vector3 camlookpos = CameraLookAtPosition.transform.position;
 
         if (value == 1)
         {
@@ -187,21 +157,16 @@ public class CameraController : MonoBehaviour
 
         }
 
-        if (LookCommander == 2)//WHEN CAMERA LOOKS BACK
+        if (isLookingBack)
         {
-            gameObject.transform.position = FixedCameraPosition;
+            gameObject.transform.position = BackCamera.transform.position;
         }
-        else if (LookCommander == 1)//WHEN CAMERA RESETS
+        else
         {
-            gameObject.transform.position = FixedCameraPosition;
-            LookCommander = 0;
-        }
-        else if (LookCommander == 0) //NORMAL
-        {
-            gameObject.transform.position = Vector3.Lerp(transform.position, FixedCameraPosition, lerptime * Time.deltaTime);
+            gameObject.transform.position = Vector3.Lerp(transform.position, CameraPosition.transform.position, lerptime * Time.deltaTime);
         }
 
-            gameObject.transform.LookAt(camlookpos);
+        gameObject.transform.LookAt(CameraLookAtPosition.transform.position);
 
     }
 

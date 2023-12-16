@@ -12,16 +12,14 @@ public class GetPlayerStats : MonoBehaviour
     public TMP_Text t_playername;
 
     private int engineClass, aiEngineClass;
-    private float enginePower, acc, turning, grip;
+    private float enginePower, acc, turning, grip, brake;
+    private float maxSpeed;
 
     void Awake()
     {
         GetAllStats();
         
-        PlayerController.GetComponent<CarController>().enginePower = enginePower;
-        PlayerController.GetComponent<CarController>().acceleration = acc;
-        PlayerController.GetComponent<CarController>().turning = turning;
-        PlayerController.GetComponent<CarController>().grip = grip;
+        PlayerController.GetComponent<CarController>().SetCarStats(enginePower, acc, maxSpeed, turning, brake, grip);
         AIController.GetComponent<BotController>().botEngineClass = aiEngineClass;//AI 
         
     }
@@ -35,6 +33,8 @@ public class GetPlayerStats : MonoBehaviour
         acc = dataManager.data.acc;
         turning = dataManager.data.turning;
         grip = dataManager.data.grip;
+        brake = 10;
+        maxSpeed = 1000;
         aiEngineClass = dataManager.data.botEngineClass;
     }
 
