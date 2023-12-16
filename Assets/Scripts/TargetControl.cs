@@ -5,27 +5,24 @@ using TMPro;
 
 public class TargetControl : MonoBehaviour
 {
-    //public GameObject[] Target;
     public TMP_Text WrongWayTxt;
     public List<GameObject> Target;
-    public int TargetCount,PlayerTargetNumber;
+    public int targetCount, playerTargetNumber;
     [SerializeField]//DEBUG
     private GameObject Player, PlayerGround, PlayerController, TargetParent, BotCarsParent, BotController, LapController;
     [SerializeField]
     private List<Vector3> targetPosList;
     public List<GameObject> playerTargets;
     public float playerPos, aiPos;
-    public int Laps, MaxLaps, PlayerPosition;
-    //[SerializeField]
-    private bool IsWrongWay = false;
-    private int PlayerCurrentTarget;
-    // Start is called before the first frame update
+    public int laps, maxLaps, playerPosition;
+    private bool isWrongWay = false;
+
+
+
     void Awake()
     {
-        IsWrongWay = false;
-
-        Laps=1;
-        //PlayerCurrentTarget = 0;
+        isWrongWay = false;
+        laps = 1;
         WrongWayTxt.text = " ";
         Player = GameObject.FindWithTag("Player");
         PlayerGround = GameObject.FindWithTag("PlayerGround");
@@ -34,31 +31,26 @@ public class TargetControl : MonoBehaviour
         BotCarsParent = GameObject.FindWithTag("AICars");
         BotController = GameObject.FindWithTag("aicontroller");
         LapController = GameObject.FindWithTag("LapController");
-        MaxLaps = LapController.GetComponent<LapControl>().MaxLaps;
+        maxLaps = LapController.GetComponent<LapControl>().maxLaps;
 
-        if(Target.Count == 0)
-        { 
-        for (int i = 0; i < TargetParent.transform.childCount; i++)
+        if (Target.Count == 0)
         {
-            GameObject targets = TargetParent.transform.GetChild(i).gameObject;
-            Target.Add(targets);
+            for (int i = 0; i < TargetParent.transform.childCount; i++)
+            {
+                GameObject targets = TargetParent.transform.GetChild(i).gameObject;
+                Target.Add(targets);
+            }
         }
-        }
-
 
         //Make the list of all targets
         for (int i = 0; i < Target.Count; i++)
         {
-            //GameObject List = Target[i];
-            TargetCount = i;
-
+            targetCount = i;
             Vector3 targetpos = Target[i].transform.position;
-
             targetPosList.Add(targetpos);
             BotController.GetComponent<BotController>().LoadAllTargets(targetpos);
             Player.GetComponent<CarGroundControl>().LoadAllTargets(targetpos);
             PlayerGround.GetComponent<CarTargetTrigger>().LoadAllTargets(targetpos);
-            //AIController.GetComponent<AIController>().TargetCount = TargetCount;
         }
     }
 
@@ -74,23 +66,21 @@ public class TargetControl : MonoBehaviour
             if (playerTargets.Contains(objects))
             {
                 playerTargets.Remove(objects);
-                IsWrongWay = true;
-                //Debug.Log("Removed");
+                isWrongWay = true;
             }
             else
             {
                 playerTargets.Add(objects);
-                IsWrongWay = false;
-                //Debug.Log("Added");
+                isWrongWay = false;
             }
         }
         else //DESTROY ALL OBJECTS
         {
-            if (playerTargets.Count > TargetCount - 5)
+            if (playerTargets.Count > targetCount - 5)
             {
-                Laps++;
-                LapController.GetComponent<LapControl>().DrawLaps(Laps);
-                if (Laps > MaxLaps) //FINISHED
+                laps++;
+                LapController.GetComponent<LapControl>().DrawLaps(laps);
+                if (laps > maxLaps) //FINISHED
                 {
                     string name = "player";
                     LapController.GetComponent<LapControl>().FinishedPlayers(-1, name);
@@ -101,20 +91,16 @@ public class TargetControl : MonoBehaviour
             playerTargets.Clear();
         }
 
-        //if(PlayerCurrentTarget-1 > playerTargets.Count/* && playerTargets.Count!=0*/)
-        if(IsWrongWay)
+        if (isWrongWay)
         {
             StartCoroutine(WrongWay());
         }
-
-        //PlayerCurrentTarget = playerTargets.Count;
 
         return playerTargets.Count;
     }
     private IEnumerator WrongWay()
     {
-        //while (PlayerCurrentTarget > playerTargets.Count)
-        if(IsWrongWay)
+        if (isWrongWay)
         {
             float wait = 0.3f;
             WrongWayTxt.text = "Wrong way";
@@ -126,7 +112,6 @@ public class TargetControl : MonoBehaviour
             WrongWayTxt.text = " ";
             yield return new WaitForSeconds(0.2f);
         }
-
     }
 
 }

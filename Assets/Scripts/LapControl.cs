@@ -6,21 +6,21 @@ using TMPro;
 public class LapControl : MonoBehaviour
 {
     public DataManager dataManager;
-    private GameObject PlayerController, PlayerCar, AICars, MainCamera;
+    private GameObject PlayerController, AICars;
     public GameObject UIGameplay, UIHighscores;
-    public TMP_Text LapsTxt/*, PosTxt*/;
-    public int MaxLaps;
-    public int Laps;
+    public TMP_Text LapsTxt;
+    public int maxLaps;
+    public int laps;
     GameObject AIController;
-    public List<string> LapTimes;
-    public List<string> Leaderboard;
+    public List<string> lapTimes;
+    public List<string> leaderboard;
     [SerializeField]
     public int leaderboardMaxLength;
     public TMP_Text playtime,leaderboards, laptimes;
-    public float CurrentTime;
-    public string PlayerName;
-    public bool GameStart = false;
-    private int SkipFrames;
+    public float currentTime;
+    public string playerName;
+    public bool gameStart = false;
+    private int skipFrames;
 
     // Start is called before the first frame update
     void Awake()
@@ -29,10 +29,8 @@ public class LapControl : MonoBehaviour
             dataManager = GameObject.FindWithTag("DataManager").GetComponent<DataManager>();
 
         PlayerController = GameObject.FindWithTag("PlayerController");
-        PlayerCar = GameObject.FindWithTag("Player");
         AICars = GameObject.FindWithTag("AICars");
         UIGameplay = GameObject.FindWithTag("UIGameplay");
-        MainCamera = GameObject.FindWithTag("MainCamera");
         AIController = GameObject.FindWithTag("aicontroller");
 
         if(UIHighscores==null)
@@ -43,50 +41,45 @@ public class LapControl : MonoBehaviour
         leaderboardMaxLength = AICars.transform.childCount + player;
 
         dataManager.Load();
-        PlayerName = dataManager.data.name;
-        MaxLaps = dataManager.data.maxLaps;
-
+        playerName = dataManager.data.name;
+        maxLaps = dataManager.data.maxLaps;
         DrawLaps(1);
-        //CurrentTime = 200f; //TESTING DELETE!!!!!!!!!!!!!!!!!
     }
+
+
     void Update()
     {
-
-        if (GameStart)
+        if (gameStart)
         {
-            CurrentTime += Time.deltaTime;
-            SkipFrames++;
+            currentTime += Time.deltaTime;
+            skipFrames++;
 
-            if (SkipFrames > 10)
+            if (skipFrames > 10)
             {
-                SkipFrames = 0;
+                skipFrames = 0;
                 ShowTime();
             }
-
         }
-
-
     }
 
     public void DrawLaps(int laps)
     {
-        if(Laps < MaxLaps)
-            Laps = laps;
+        if(this.laps < maxLaps)
+            this.laps = laps;
 
-        LapsTxt.text = "Laps: " + Laps.ToString() + " / " + MaxLaps.ToString();
-
+        LapsTxt.text = "Laps: " + this.laps.ToString() + " / " + maxLaps.ToString();
 
     }
+
     private void ShowTime()
     {
-        float curtime = (Mathf.Round(CurrentTime * 100f) / 100f);
-
-        string calculatedTime = ConvertTime(curtime); //Can cause crashing!
+        float curtime = (Mathf.Round(currentTime * 100f) / 100f);
+        string calculatedTime = ConvertTime(curtime); 
         playtime.text = calculatedTime;
 
     }
 
-    private string ConvertTime(float curtime) //Can cause crashing in update!
+    private string ConvertTime(float curtime) 
     {
         int minutes = 0;
         string result;
@@ -115,47 +108,38 @@ public class LapControl : MonoBehaviour
 
     public void FinishedPlayers(int number, string name) //-1 = player
     {
-        if (LapTimes.Count < leaderboardMaxLength && (name != "NotAItoday")) //Not a player who is using AIgroundControl-script!
+        if (lapTimes.Count < leaderboardMaxLength && (name != "NotAItoday")) // Not a player who is using AIgroundControl-script
         {
-            
-
-            //Calculate times
-            //int minutes = 0;
-            float curtime = Mathf.Round(CurrentTime * 100f) / 100f;
-
+            float curtime = Mathf.Round(currentTime * 100f) / 100f;
             string calculatedTime = ConvertTime(curtime);
-            LapTimes.Add(calculatedTime);
+            lapTimes.Add(calculatedTime);
 
             //Calculate car positions in leaderboard
-
-            string pos = (1 + Leaderboard.Count).ToString();
+            string pos = (1 + leaderboard.Count).ToString();
             string space = "  ";
-            if (1 + Leaderboard.Count >= 10)
+            if (1 + leaderboard.Count >= 10)
             {
                 space = " ";
             }
 
             if (name == "player")
             {
-                //Names.Add(PlayerName);
-                name = PlayerName.ToString();
-                Leaderboard.Add(pos + space + name);
+                name = playerName.ToString();
+                leaderboard.Add(pos + space + name);
                 //PLAYER AUTOPILOT ON!
                 AIController.GetComponent<BotController>().StartPlayerAutopilot();
-                //PlayerCar.GetComponent<CarGroundControl>().Autopilot = true;
                 PlayerController.SetActive(false); //Multiple leaderboards if true
                 StartCoroutine(WaitHighscores());
             }
             else
             {
-                //Names.Add(name);
-                Leaderboard.Add(pos + space + name);
+                leaderboard.Add(pos + space + name);
                 GameObject ai = AICars.gameObject.transform.GetChild(number).gameObject;
                 ai.GetComponent<BotGroundControl>().raceIsOver = true;
             }
             //Add leaderboard results in loop command
             string result = "";
-            foreach (var listMember in Leaderboard)
+            foreach (var listMember in leaderboard)
             {
                 result += listMember.ToString() + "\n";
             }
@@ -163,12 +147,9 @@ public class LapControl : MonoBehaviour
 
             //Add all laptimes to single string "alltimes" in loop command
             string allTimes = "";
-            foreach (var listMember in LapTimes)
+            foreach (var listMember in lapTimes)
             {
-                //string mins = minutes.ToString();
-                //times += listMember.ToString() + "\n";
                 allTimes += string.Format("{0:F2}", listMember).ToString() + "\n";
-
             }
             laptimes.text = allTimes;
         }

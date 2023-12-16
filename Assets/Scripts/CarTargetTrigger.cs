@@ -8,7 +8,7 @@ public class CarTargetTrigger : MonoBehaviour
     public List<Vector3> targetPosList;
 
     public int nextTarget, targetCount;
-    public float TargetDistance;
+    public float targetDistance;
     public bool playerIsRespawing = false;
 
     void Awake()
@@ -25,44 +25,38 @@ public class CarTargetTrigger : MonoBehaviour
 
     }
 
-
     void Update()
     {
         if (nextTarget < targetCount)
         {
             Vector3 targetpos = targetPosList[nextTarget];
-            TargetDistance = Vector3.Distance(transform.position, targetpos);
-
+            targetDistance = Vector3.Distance(transform.position, targetpos);
         }
     }
     void OnTriggerEnter(Collider other)
     {
-        if (!playerIsRespawing)
+        if (playerIsRespawing)
+        {
+            playerIsRespawing = false;
+            return;
+        }
+
+        if (other.gameObject.layer != 7)// not GOAL OBJECT
+        {
+            if (other.tag == "slowtarget" || other.tag == "normaltarget" || other.tag == "fasttarget")
+            {
+                nextTarget = TargetController.GetComponent<TargetControl>().PlayerTargetList(other.gameObject, false);
+
+            }
+        }
+        else if (other.gameObject.layer == 7)// GOAL OBJECT
         {
 
-            if (other.gameObject.layer != 7)// not GOAL OBJECT
-            {
-
-                if (other.tag == "slowtarget" || other.tag == "normaltarget" || other.tag == "fasttarget")
-                {
-
-                    nextTarget = TargetController.GetComponent<TargetControl>().PlayerTargetList(other.gameObject, false);
-                    //Player.GetComponent<CarGroundControl>().nextTarget = nextTarget;
-
-                }
-            }
-            else if (other.gameObject.layer == 7)// GOAL OBJECT
-            {
-
-                TargetController.GetComponent<TargetControl>().PlayerTargetList(other.gameObject, true);
-
-                //TargetsCache.Clear();
-                nextTarget = 0;
-                //Player.GetComponent<CarGroundControl>().nextTarget = nextTarget;
-            }
+            TargetController.GetComponent<TargetControl>().PlayerTargetList(other.gameObject, true);
+            nextTarget = 0;
 
         }
-        else
-            playerIsRespawing = false;
+
+
     }
 }

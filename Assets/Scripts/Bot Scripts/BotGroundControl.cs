@@ -178,7 +178,7 @@ public class BotGroundControl : MonoBehaviour
         }
         else if (!gameStart)
         {
-            gameStart = GameController.GetComponent<RaceControl>().GameStart;
+            gameStart = GameController.GetComponent<RaceControl>().gameStart;
 
         }
         if(lap>maxLaps && !isFinished)

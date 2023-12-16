@@ -6,7 +6,7 @@ using TMPro;
 public class RaceControl : MonoBehaviour
 {
     public GameObject LapController;
-    public bool GameStart;
+    public bool gameStart;
     public TMP_Text CountText;
 
     // Start is called before the first frame update
@@ -16,7 +16,7 @@ public class RaceControl : MonoBehaviour
         if (LapController == null)
             LapController = GameObject.FindWithTag("LapController");
 
-        GameStart = false;
+        gameStart = false;
     }
     void Start()
     {
@@ -38,8 +38,8 @@ public class RaceControl : MonoBehaviour
         countNumber--;
         yield return new WaitForSeconds(1f);// 0 ->
         CountText.text = "GO!";
-        GameStart = true;
-        LapController.GetComponent<LapControl>().GameStart = true;
+        gameStart = true;
+        LapController.GetComponent<LapControl>().gameStart = true;
         yield return new WaitForSeconds(1f);
         CountText.text = "";
         

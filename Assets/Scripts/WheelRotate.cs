@@ -5,21 +5,22 @@ using UnityEngine;
 public class WheelRotate : MonoBehaviour
 {
     public GameObject frontWheels, backWheels;
-    float Speed;
     Vector3 oldPosition;
-    // Start is called before the first frame update
+    float speed;
+
+
     void Awake()
     {
         oldPosition = transform.position;
     }
 
-    // Update is called once per frame
+
     void Update()
     {
-        Speed = Vector3.Distance(oldPosition, transform.position) * 20000f; // Original = * 100f
+        speed = Vector3.Distance(oldPosition, transform.position) * 20000f; // Original = * 100f
 
-        frontWheels.transform.Rotate(Vector3.forward * Time.deltaTime * -Speed, Space.Self);
-        backWheels.transform.Rotate(Vector3.forward * Time.deltaTime * -Speed, Space.Self);
+        frontWheels.transform.Rotate(Vector3.forward * Time.deltaTime * -speed, Space.Self);
+        backWheels.transform.Rotate(Vector3.forward * Time.deltaTime * -speed, Space.Self);
         oldPosition = transform.position;
     }
 }

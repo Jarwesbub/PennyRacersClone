@@ -30,8 +30,8 @@ public class CarParticles : MonoBehaviour
 
     void Update()
     {
-        isDrifting = PlayerController.GetComponent<CarController>().isDrifting;
-        roadType = Player.GetComponent<CarGroundControl>().RoadType;
+        isDrifting = PlayerController.GetComponent<CarController>().GetIsDrifting();
+        roadType = Player.GetComponent<CarGroundControl>().roadType;
 
         InputChecks();
 
@@ -44,8 +44,8 @@ public class CarParticles : MonoBehaviour
 
         if (isDrifting && roadType == 1)//Asphalt
         {
-            float playerinput = PlayerController.GetComponent<CarController>().verticalInput;
-            bool IsBraking = PlayerController.GetComponent<CarController>().isBraking;
+            float playerinput = PlayerController.GetComponent<CarController>().GetVerticalInput();
+            bool IsBraking = PlayerController.GetComponent<CarController>().GetIsBraking();
             if (playerinput >= scale || playerinput <= -scale || IsBraking)
             {
                 AsphaltDriftPlay(true);
@@ -53,8 +53,8 @@ public class CarParticles : MonoBehaviour
         }
         else if (isDrifting && roadType == 2)//Grass
         {
-            float playerinput = PlayerController.GetComponent<CarController>().verticalInput;
-            bool IsBraking = PlayerController.GetComponent<CarController>().isBraking;
+            float playerinput = PlayerController.GetComponent<CarController>().GetVerticalInput();
+            bool IsBraking = PlayerController.GetComponent<CarController>().GetIsBraking();
             if (playerinput >= scale || playerinput <= -scale || IsBraking)
             {
                 DirtDriftPlay(true);

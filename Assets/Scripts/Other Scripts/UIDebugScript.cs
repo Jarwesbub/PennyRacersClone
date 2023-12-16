@@ -22,8 +22,8 @@ public class UIDebugScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        isDrifting = PlayerController.GetComponent<CarController>().isDrifting;
-        float turning = PlayerController.GetComponent<CarController>().horizontalInput;
+        isDrifting = PlayerController.GetComponent<CarController>().GetIsDrifting();
+        float turning = PlayerController.GetComponent<CarController>().GetHorizontalInput();
 
         if (isDrifting)
             ui_drift.SetActive(true);

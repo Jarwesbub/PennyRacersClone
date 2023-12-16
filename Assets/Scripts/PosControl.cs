@@ -9,28 +9,28 @@ public class PosControl : MonoBehaviour
     public TMP_Text PlayerPosTxt;
     public TMP_Text LapsTxt, PosTxt, WrongWayTxt;
     public GameObject AICars;
-    public List<GameObject> AI;
+    public List<GameObject> botsList;
     public GameObject Player, PlayerGround, TargetController;
-    public GameObject NextAI, PrevAI;
+    public GameObject nextAI, prevAI;
     public int playerPos, playerNextTarget, nextAITarget, prevAITarget;
     //public int nextAINumb,prevAINumb;
-    public int Lap, nextAILap, prevAILap;
+    public int lap, nextAILap, prevAILap;
     public float playerTargetDistance, nextAITargetDist/*, prevAITargetDist*/;
-    public int AICount;
-    public bool PlayerIsLast; //debugging can be deleted later
-    private float Steps, waitSteps;
+    public int botCount;
+    public bool playerIsLast; //debugging can be deleted later
+    private float steps, waitSteps;
 
     // Start is called before the first frame update
     void Awake()
     {
         waitSteps = 0.6f; //seconds
 
-        Lap = 1;
+        lap = 1;
         if (AICars == null)
             AICars = GameObject.FindWithTag("AICars");
 
-            Player = GameObject.FindWithTag("Player");
-            PlayerGround = GameObject.FindWithTag("PlayerGround");
+        Player = GameObject.FindWithTag("Player");
+        PlayerGround = GameObject.FindWithTag("PlayerGround");
 
         if (TargetController == null)
             TargetController = GameObject.FindWithTag("TargetController");
@@ -41,21 +41,19 @@ public class PosControl : MonoBehaviour
         for (i = 0; i < AICars.transform.childCount; i++)
         {
             GameObject ai = AICars.transform.GetChild(i).gameObject;
-            AI.Add(ai);
+            botsList.Add(ai);
         }
-        AICount = i-1;
+        botCount = i - 1;
         playerPos = i; //Last place
         //PLAYER START LAST ->
-        NextAI = AI[AICount];
-        PrevAI = AI[AICount];
+        nextAI = botsList[botCount];
+        prevAI = botsList[botCount];
     }
 
 
-
-    // Update is called once per frame
     void Update()
     {
-        Steps += Time.deltaTime;
+        steps += Time.deltaTime;
         string th = "th";
         if (playerPos == 0)
             th = "st";
@@ -64,52 +62,48 @@ public class PosControl : MonoBehaviour
         else if (playerPos == 2)
             th = "rd";
         int playerposadd = playerPos + 1;
-        PlayerPosTxt.text = "Pos: "+playerposadd.ToString()+th;
-        
-        Lap = TargetController.GetComponent<TargetControl>().Laps;    
-        nextAITarget = NextAI.GetComponent<BotGroundControl>().nextTarget;
-        nextAILap = NextAI.GetComponent<BotGroundControl>().lap;
-        prevAITarget = PrevAI.GetComponent<BotGroundControl>().nextTarget;
-        //playerNextTarget = Player.GetComponent<CarGroundControl>().nextTarget;
+        PlayerPosTxt.text = "Pos: " + playerposadd.ToString() + th;
+
+        lap = TargetController.GetComponent<TargetControl>().laps;
+        nextAITarget = nextAI.GetComponent<BotGroundControl>().nextTarget;
+        nextAILap = nextAI.GetComponent<BotGroundControl>().lap;
+        prevAITarget = prevAI.GetComponent<BotGroundControl>().nextTarget;
         playerNextTarget = PlayerGround.GetComponent<CarTargetTrigger>().nextTarget;
+
+        if (lap == nextAILap) //SAME LAP
         {
-            if (Lap == nextAILap) //SAME LAP
+            if (playerNextTarget > nextAITarget)
             {
-                if (playerNextTarget > nextAITarget)
-                {
-                    //if (playerPos > 1)
-                    playerPos = CalculatePosition(playerPos-1, playerPos, true);
-
-                }
-                else if (playerNextTarget < prevAITarget)
-                {
-                    //if (playerPos < LastPosition)
-                    playerPos = CalculatePosition(playerPos - 1, playerPos, false);
-                }
-                else if (nextAITarget == playerNextTarget || prevAITarget == playerNextTarget) //calculate distance from the next target
-                {
-                    if (Steps > waitSteps)
-                    {
-                        Steps = 0f;
-                        GetTargetDistances();
-                    }
-                }
-                
-            }
-            
-            else if(Lap > nextAILap) //PLAYER AHEAD
-            {
-                   playerPos = CalculatePosition(playerPos - 1, playerPos, true);
+                playerPos = CalculatePosition(playerPos - 1, playerPos, true);
 
             }
-            else if (Lap < prevAILap) //AI AHEAD
+            else if (playerNextTarget < prevAITarget)
             {
                 playerPos = CalculatePosition(playerPos - 1, playerPos, false);
             }
-            
+            else if (nextAITarget == playerNextTarget || prevAITarget == playerNextTarget) //calculate distance from the next target
+            {
+                if (steps > waitSteps)
+                {
+                    steps = 0f;
+                    GetTargetDistances();
+                }
+            }
+
+        }
+        else if (lap > nextAILap) //PLAYER AHEAD
+        {
+            playerPos = CalculatePosition(playerPos - 1, playerPos, true);
+
+        }
+        else if (lap < prevAILap) //AI AHEAD
+        {
+            playerPos = CalculatePosition(playerPos - 1, playerPos, false);
         }
 
     }
+
+
     private int CalculatePosition(int nextai, int prevai, bool playerGoUP)
     {
         int playerpos = playerPos;
@@ -124,71 +118,50 @@ public class PosControl : MonoBehaviour
         }
         else if (!playerGoUP)
         {
-            if (playerpos < AICount + 1)
+            if (playerpos < botCount + 1)
             {
                 playerpos++;
             }
             else
-                playerpos = AICount + 1;
+                playerpos = botCount + 1;
         }
 
 
-        if(playerpos > 0 && playerpos < AICount+1)
+        if (playerpos > 0 && playerpos < botCount + 1)
         {
             nextai = playerpos - 1;
             prevai = playerpos;
-            PlayerIsLast = false;
+            playerIsLast = false;
         }
-        else if (prevai > AICount)
+        else if (prevai > botCount)
         {
-            nextai = AICount-1;
-            prevai = AICount;
-            PlayerIsLast = true;
+            nextai = botCount - 1;
+            prevai = botCount;
+            playerIsLast = true;
         }
-        if(nextai < 0)
+        if (nextai < 0)
         {
             nextai = 0;
             prevai = 0;
-            PlayerIsLast = false;
+            playerIsLast = false;
         }
 
-
-
-        //nextAINumb = nextai;
-        //prevAINumb = prevai;
-        NextAI = AI[nextai];
-        PrevAI = AI[prevai];
-
+        nextAI = botsList[nextai];
+        prevAI = botsList[prevai];
 
         return playerpos;
-
-
     }
 
 
     private void GetTargetDistances()
     {
-        nextAITargetDist = NextAI.GetComponent<BotGroundControl>().targetDistance;
-        //playerTargetDistance = Player.GetComponent<CarGroundControl>().TargetDistance;
-        playerTargetDistance = PlayerGround.GetComponent<CarTargetTrigger>().TargetDistance;
-        //nextAITargetDist = Mathf.Round(nextAITargetDist * 100f) / 100f;
-        //prevAITargetDist = Mathf.Round(prevAITargetDist * 100f) / 100f;
+        nextAITargetDist = nextAI.GetComponent<BotGroundControl>().targetDistance;
+        playerTargetDistance = PlayerGround.GetComponent<CarTargetTrigger>().targetDistance;
 
         if (playerTargetDistance < nextAITargetDist)
         {
-            playerPos = CalculatePosition(playerPos-1, playerPos, true);
+            playerPos = CalculatePosition(playerPos - 1, playerPos, true);
         }
-       /*
-        else
-        {
-            prevAITargetDist = PrevAI.GetComponent<AIGroundControl>().TargetDistance;
-            if (playerTargetDistance > prevAITargetDist+val)
-            {
-                playerPos = CalculatePosition(playerPos - 1, playerPos, false);
-            }
-        }
-        */
-
 
     }
 

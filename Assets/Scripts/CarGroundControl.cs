@@ -9,19 +9,17 @@ public class CarGroundControl : MonoBehaviour
     private GameObject TargetController;
     public List<Vector3> targetPosList;
     private int nextTarget, targetCount;
-    public bool CarIsGrounded, Autopilot, IsRespawning = false;
-    public int RoadType;
+    public bool carIsGrounded, autopilot, isRespawning = false;
+    public int roadType;
 
-    //Possible BUGS in future:
-    //private int targetTriggerBug = 2;//Avoids multiple trigger actions when collision with targets
     [SerializeField]
     private int groundTriggerCount; //Works when ROAD and TERRAIN layered object are close to each other
-    //
+
     void Awake()
     {
-        CarIsGrounded = false;
-        RoadType = 0;
-        Autopilot = false;
+        carIsGrounded = false;
+        roadType = 0;
+        autopilot = false;
         nextTarget = 0;
         PlayerController = GameObject.FindWithTag("PlayerController");
         PlayerGround = GameObject.FindWithTag("PlayerGround");
@@ -34,17 +32,7 @@ public class CarGroundControl : MonoBehaviour
         targetCount = targetPosList.Count - 1;
 
     }
-    /*
-    void Update()
-    {
-        
-        if (nextTarget < targetCount)
-        {
-            Vector3 targetpos = targetPosList[nextTarget];
-            TargetDistance = Vector3.Distance(transform.position, targetpos);
-        
-        }
-    }*/
+
     public void PlayerRespawn(bool fromOtherScript) //Accessed from CarController script when TRUE
     {
         PlayerGround.GetComponent<CarTargetTrigger>().playerIsRespawing = true;
@@ -57,7 +45,7 @@ public class CarGroundControl : MonoBehaviour
         {
             RespawnPosition();
         }
-        
+
     }
     private void RespawnPosition()
     {
@@ -77,7 +65,7 @@ public class CarGroundControl : MonoBehaviour
 
     IEnumerator RespawnCooldown(float sec)
     {
-        PlayerController.GetComponent<CarController>().resetPlayer = true;
+        PlayerController.GetComponent<CarController>().SetResetPlayer(true);
 
         yield return new WaitForSeconds(sec);
 
@@ -87,20 +75,19 @@ public class CarGroundControl : MonoBehaviour
 
         RespawnPosition();
 
-        PlayerController.GetComponent<CarController>().resetPlayer = false;
+        PlayerController.GetComponent<CarController>().SetResetPlayer(false);
     }
-
 
 
     void OnTriggerEnter(Collider other)
     {
         if (other.tag == "ground")
         {
-            RoadType = 0;
-            CarIsGrounded = true;
+            roadType = 0;
+            carIsGrounded = true;
             MainCamera.GetComponent<CameraController>().ChangeCameraSettings(1); //Car is grounded -> script
         }
-        else if(other.gameObject.layer == 8 || other.gameObject.layer == 9) //ROAD or TERRAIN
+        else if (other.gameObject.layer == 8 || other.gameObject.layer == 9) //ROAD or TERRAIN
         {
             groundTriggerCount++;
             CheckGroundType(other);
@@ -110,92 +97,64 @@ public class CarGroundControl : MonoBehaviour
             PlayerRespawn(false);
         }
     }
+
     void OnTriggerStay(Collider other)
     {
-        if(other.tag == "Asphalt" || other.tag == "Grass" || other.tag == "ground")
+        if (other.tag == "Asphalt" || other.tag == "Grass" || other.tag == "ground")
         {
-            CarIsGrounded = true;
+            carIsGrounded = true;
         }
-        if(RoadType == 0)
+        if (roadType == 0)
         {
             CheckGroundType(other);
         }
     }
+
     void CheckGroundType(Collider other)
     {
-        
+
+        if (other.tag == "Asphalt")
         {
-            
-            if (other.tag == "Asphalt")
-            {
-                RoadType = 1;
-                CarIsGrounded = true;
-                MainCamera.GetComponent<CameraController>().ChangeCameraSettings(1); //Car is grounded -> script
-            }
-            if (other.tag == "Grass")
-            {
-                RoadType = 2;
-                CarIsGrounded = true;
-                MainCamera.GetComponent<CameraController>().ChangeCameraSettings(1); //Car is grounded -> script
-            }
+            roadType = 1;
+            carIsGrounded = true;
+            MainCamera.GetComponent<CameraController>().ChangeCameraSettings(1); //Car is grounded -> script
         }
+        if (other.tag == "Grass")
+        {
+            roadType = 2;
+            carIsGrounded = true;
+            MainCamera.GetComponent<CameraController>().ChangeCameraSettings(1); //Car is grounded -> script
+        }
+
     }
 
     void OnTriggerExit(Collider other)
     {
-        
         if (other.tag == "ground")
         {
-            RoadType = 0;
+            roadType = 0;
             groundTriggerCount--;
             if (groundTriggerCount <= 0)
-                CarIsGrounded = false;
-           MainCamera.GetComponent<CameraController>().ChangeCameraSettings(2); //Car is not grounded -> script
+                carIsGrounded = false;
+            MainCamera.GetComponent<CameraController>().ChangeCameraSettings(2); //Car is not grounded -> script
         }
         else if (other.tag == "Asphalt")
         {
-            RoadType = 0;
+            roadType = 0;
             groundTriggerCount--;
             if (groundTriggerCount <= 0)
-                CarIsGrounded = false;
+                carIsGrounded = false;
             MainCamera.GetComponent<CameraController>().ChangeCameraSettings(2); //Car is not grounded -> script
         }
         else if (other.tag == "Grass")
         {
-            RoadType = 0;
+            roadType = 0;
             groundTriggerCount--;
             if (groundTriggerCount <= 0)
-                CarIsGrounded = false;
+                carIsGrounded = false;
             MainCamera.GetComponent<CameraController>().ChangeCameraSettings(2); //Car is not grounded -> script
         }
-        /*
-        if (targetTriggerBug==2)
-        {
-            targetTriggerBug = 0;
-                if (other.gameObject.layer != 7)// not GOAL OBJECT
-                {
 
-                    if (other.tag == "slowtarget" || other.tag == "normaltarget" || other.tag == "fasttarget")
-                    {
-
-                        nextTarget = TargetController.GetComponent<TargetControl>().PlayerTargetList(other.gameObject, false);
-                    
-
-                    }
-                }
-                else if (other.gameObject.layer == 7)// GOAL OBJECT
-                {
-                    
-                    TargetController.GetComponent<TargetControl>().PlayerTargetList(other.gameObject, true);
-                    //TargetsCache.Clear();
-                    nextTarget = 0;
-                }
-            
-        }
-        else
-            targetTriggerBug++;
-        */
     }
-
 
 }
